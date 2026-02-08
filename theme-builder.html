@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Theme - Deckster</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: {
+                    sans: ['Inter', 'sans-serif'],
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white shadow-lg max-w-[457px] w-full min-h-[720px] max-h-screen flex flex-col overflow-hidden">
+        <!-- Scrollable content -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            <!-- Header -->
+            <div class="flex items-start justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Edit Theme</h1>
+                <p class="text-gray-600 text-sm mt-1">Use ↑ ↓ on keyboard to switch slides</p>
+            </div>
+            <button class="text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Theme identity section -->
+        <div class="space-y-4">
+            <h2 class="text-gray-900 font-bold text-lg">Theme identity</h2>
+
+            <!-- Theme Name -->
+            <div class="flex items-center justify-between">
+                <label class="text-gray-700">Theme Name</label>
+                <input type="text" value="PREMIUM/FINANCE" class="w-52 border border-gray-300 rounded-lg px-4 py-2.5 text-gray-700 focus:outline-none focus:border-[#0500FF]">
+            </div>
+
+            <!-- Main font -->
+            <div class="flex items-center justify-between">
+                <label class="text-gray-700">Main font</label>
+                <div class="w-52 relative">
+                    <select class="w-full appearance-none border border-gray-200 rounded-lg px-4 py-2.5 pr-10 text-gray-700 focus:outline-none focus:border-[#0500FF]">
+                        <option>Garamond</option>
+                        <option>Arial</option>
+                    </select>
+                    <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Logo -->
+            <div class="flex items-center justify-between">
+                <span class="text-gray-700">Logo</span>
+                <a href="#" class="text-[#0500FF] hover:text-[#0500FF] text-sm">Change</a>
+            </div>
+        </div>
+
+        <hr class="border-gray-100">
+
+        <!-- Text colours section -->
+        <div class="space-y-4">
+            <h2 class="text-gray-900 font-bold text-lg">Text colours</h2>
+
+            <!-- Primary text -->
+            <div class="flex items-center justify-between">
+                <span class="text-gray-700">Primary text</span>
+                <div class="flex items-center gap-2">
+                    <input type="text" value="#fffff2" class="w-24 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 text-sm text-center focus:outline-none focus:border-[#0500FF]">
+                    <input type="color" value="#fffff2" class="w-6 h-6 rounded-full cursor-pointer border border-gray-200 p-0 overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-full">
+                </div>
+            </div>
+
+            <!-- Contrasting font -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-gray-700">Contrasting font</span>
+                    <p class="text-gray-400 text-xs">Used for non-white surfaces</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="text" value="#7dc990" class="w-24 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 text-sm text-center focus:outline-none focus:border-[#0500FF]">
+                    <input type="color" value="#7dc990" class="w-6 h-6 rounded-full cursor-pointer border border-gray-200 p-0 overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-full">
+                </div>
+            </div>
+
+            <!-- Highlight text -->
+            <div class="flex items-center justify-between">
+                <span class="text-gray-700">Highlight text</span>
+                <div class="flex items-center gap-2">
+                    <input type="text" value="#2eb740" class="w-24 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 text-sm text-center focus:outline-none focus:border-[#0500FF]">
+                    <input type="color" value="#2eb740" class="w-6 h-6 rounded-full cursor-pointer border border-gray-200 p-0 overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-full">
+                </div>
+            </div>
+
+            <!-- Muted text -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-gray-700">Muted text</span>
+                    <p class="text-gray-400 text-xs">Annotations, secondary text, etc.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="text" value="#dff0d1" class="w-24 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 text-sm text-center focus:outline-none focus:border-[#0500FF]">
+                    <input type="color" value="#dff0d1" class="w-6 h-6 rounded-full cursor-pointer border border-gray-200 p-0 overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-full">
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-gray-100">
+
+        <!-- Backgrounds section -->
+        <div class="space-y-4">
+            <h2 class="text-gray-900 font-bold text-lg">Backgrounds</h2>
+
+            <!-- Slide background -->
+            <div class="flex items-center justify-between">
+                <span class="text-gray-700">Slide background</span>
+                <div class="flex items-center gap-2">
+                    <input type="text" value="#082501" class="w-24 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 text-sm text-center focus:outline-none focus:border-[#0500FF]">
+                    <input type="color" value="#082501" class="w-6 h-6 rounded-full cursor-pointer border border-gray-200 p-0 overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-full">
+                </div>
+            </div>
+
+            <!-- Background glow -->
+            <div class="flex items-center justify-between">
+                <span class="text-gray-700">Background glow</span>
+                <div class="flex items-center gap-2">
+                    <input type="text" value="#E8F0FE" class="w-24 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 text-sm text-center focus:outline-none focus:border-[#0500FF]">
+                    <input type="color" value="#E8F0FE" class="w-6 h-6 rounded-full cursor-pointer border border-gray-200 p-0 overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-full">
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-gray-100">
+
+        <!-- Shapes section -->
+        <div class="space-y-4">
+            <h2 class="text-gray-900 font-bold text-lg">Shapes</h2>
+
+            <!-- Shapes palette -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-700">Shapes palette</span>
+                        <div class="flex gap-1">
+                            <div class="w-2 h-2 rounded-full bg-[#293a2c]"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#3d5542]"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#517058]"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#658b6e]"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#79a684]"></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-xs">Generates 5 colors for shapes and highlights</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="text" value="#293a2c" class="w-24 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 text-sm text-center focus:outline-none focus:border-[#0500FF]">
+                    <input type="color" value="#293a2c" class="w-6 h-6 rounded-full cursor-pointer border border-gray-200 p-0 overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-full">
+                </div>
+            </div>
+
+            <!-- Dark background checkbox -->
+            <div class="flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-2.5">
+                <input type="checkbox" checked class="w-5 h-5 text-[#0500FF] rounded border-gray-300 focus:ring-[#0500FF]">
+                <span class="text-gray-600 text-sm">Adjust shapes palette for dark slide background</span>
+            </div>
+
+            <!-- Shape corners -->
+            <div class="flex items-center justify-between">
+                <span class="text-gray-700">Shape corners</span>
+                <div class="flex">
+                    <button class="p-2 border border-gray-300 rounded-l-lg bg-[#0500FF] text-white transition-transform hover:scale-105">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="4" y="4" width="16" height="16" rx="4" ry="4"/>
+                        </svg>
+                    </button>
+                    <button class="p-2 border border-gray-300 border-l-0 rounded-r-lg bg-white text-gray-700 hover:bg-[#0500FF]/10 hover:text-[#0500FF] transition-all hover:scale-105">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="4" y="4" width="16" height="16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shape shadows -->
+            <div class="flex items-center justify-between">
+                <span class="text-gray-700">Shape shadows</span>
+                <div class="flex">
+                    <button class="p-2 border border-gray-300 rounded-l-lg bg-[#0500FF] text-white transition-transform hover:scale-105">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="14" height="14" rx="2" ry="2"/>
+                            <rect x="7" y="7" width="14" height="14" rx="2" ry="2" class="fill-current opacity-30"/>
+                        </svg>
+                    </button>
+                    <button class="p-2 border border-gray-300 border-l-0 rounded-r-lg bg-white text-gray-700 hover:bg-[#0500FF]/10 hover:text-[#0500FF] transition-all hover:scale-105">
+                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-gray-100">
+
+        <!-- Icons section -->
+        <div class="space-y-4">
+            <h2 class="text-gray-900 font-bold text-lg">Icons</h2>
+
+            <!-- Primary icons colour -->
+            <div class="flex items-center justify-between">
+                <span class="text-gray-700">Primary colour</span>
+                <div class="flex items-center gap-2">
+                    <input type="text" value="#2eb740" class="w-24 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 text-sm text-center focus:outline-none focus:border-[#0500FF]">
+                    <input type="color" value="#2eb740" class="w-6 h-6 rounded-full cursor-pointer border border-gray-200 p-0 overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-full">
+                </div>
+            </div>
+
+            <!-- Contrasting icon colour -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-gray-700">Contrasting colour</span>
+                    <p class="text-gray-400 text-xs">Used for non-white surfaces</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="text" value="#2eb740" class="w-24 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 text-sm text-center focus:outline-none focus:border-[#0500FF]">
+                    <input type="color" value="#2eb740" class="w-6 h-6 rounded-full cursor-pointer border border-gray-200 p-0 overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-full">
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-gray-100">
+
+        <!-- Charts section -->
+        <div class="space-y-4">
+            <h2 class="text-gray-900 font-bold text-lg">Charts</h2>
+
+            <!-- Chart palette -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-700">Chart palette</span>
+                        <div class="flex gap-1">
+                            <div class="w-2 h-2 rounded-full bg-[#2d5a32]"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#3d7a44]"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#4d9a56]"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#5dba68]"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#6dda7a]"></div>
+                            <div class="w-2 h-2 rounded-full bg-[#9dea9c]"></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-xs">Generates 6 colors for data series</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="text" value="#44ff00" class="w-24 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 text-sm text-center focus:outline-none focus:border-[#0500FF]">
+                    <input type="color" value="#44ff00" class="w-6 h-6 rounded-full cursor-pointer border border-gray-200 p-0 overflow-hidden [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-full">
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+        <!-- Action buttons - sticky footer -->
+        <div class="sticky bottom-0 bg-white p-6 pt-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+            <div class="flex gap-3">
+                <button class="flex-1 bg-[#0500FF] hover:bg-[#0400CC] text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                    Update
+                </button>
+                <button class="flex-1 border-2 border-[#0500FF] text-[#0500FF] hover:bg-[#0500FF]/10 font-medium py-3 px-6 rounded-lg transition-colors">
+                    Save as new
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
