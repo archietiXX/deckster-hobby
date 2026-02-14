@@ -40,7 +40,12 @@
         </svg>
 
         <!-- Final text -->
-        <p class="text-3xl font-bold text-red-600">Будешь моей Валентинкой?</p>
+        <p class="text-3xl font-bold text-red-600 mb-8">Будешь моей Валентинкой?</p>
+
+        <!-- Restart button -->
+        <button onclick="location.reload()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300 shadow-lg hover:shadow-xl active:scale-95">
+            Начать заново
+        </button>
     </div>
 
     <!-- Hearts container for burst animation -->
@@ -251,7 +256,8 @@
 
                     const rotation = rotateMatch ? rotateMatch[1] : '0deg';
 
-                    element.style.transitionDuration = '0.3s';
+                    element.style.transitionDuration = '0.8s';
+                    element.style.transitionTimingFunction = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                     element.style.transform = `translate(${currentX + pushX}px, ${currentY + pushY}px) rotate(${rotation})`;
                 }
             });
