@@ -21,29 +21,29 @@
 <body class="bg-gradient-to-br from-red-100 via-pink-200 to-rose-100 min-h-screen flex items-center justify-center overflow-hidden">
     <!-- Initial heart with "Open me" -->
     <div id="mainHeart" class="cursor-pointer transition-transform hover:scale-110 active:scale-95">
-        <div class="text-center">
+        <div class="text-center px-4">
             <!-- Heart SVG -->
-            <svg class="w-96 h-96 mx-auto mb-4 text-red-500 drop-shadow-lg animate-pulse" viewBox="0 0 24 24" fill="currentColor">
+            <svg class="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 mx-auto mb-4 text-red-500 drop-shadow-lg animate-pulse" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
             </svg>
 
             <!-- Text -->
-            <p class="text-3xl font-bold text-red-600">Open me</p>
+            <p class="text-2xl sm:text-3xl font-bold text-red-600">Open me</p>
         </div>
     </div>
 
     <!-- Final message -->
-    <div id="finalMessage" class="hidden text-center">
+    <div id="finalMessage" class="hidden text-center px-4">
         <!-- Heart SVG -->
-        <svg class="w-96 h-96 mx-auto mb-4 text-red-500 drop-shadow-lg animate-pulse" viewBox="0 0 24 24" fill="currentColor">
+        <svg class="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 mx-auto mb-4 text-red-500 drop-shadow-lg animate-pulse" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
         </svg>
 
         <!-- Final text -->
-        <p class="text-3xl font-bold text-red-600 mb-8">Будешь моей Валентинкой?</p>
+        <p class="text-2xl sm:text-3xl font-bold text-red-600 mb-6 sm:mb-8">Будешь моей Валентинкой?</p>
 
         <!-- Restart button -->
-        <button onclick="location.reload()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-lg transition-colors duration-300 shadow-lg hover:shadow-xl active:scale-95">
+        <button onclick="location.reload()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-6 sm:py-3 sm:px-8 text-base sm:text-lg rounded-lg transition-colors duration-300 shadow-lg hover:shadow-xl active:scale-95">
             Начать заново
         </button>
     </div>
@@ -219,12 +219,12 @@
             }, 50);
         }
 
-        // Mouse interaction - push hearts away from cursor
-        document.addEventListener('mousemove', function(e) {
+        // Function to handle interaction (mouse or touch)
+        function handleInteraction(x, y) {
             if (!isAnimationActive) return;
 
-            mouseX = e.clientX;
-            mouseY = e.clientY;
+            mouseX = x;
+            mouseY = y;
 
             allElements.forEach(element => {
                 const rect = element.getBoundingClientRect();
@@ -235,7 +235,7 @@
                 const deltaY = elementY - mouseY;
                 const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-                // Only affect hearts within 150px of cursor
+                // Only affect hearts within 150px of cursor/finger
                 if (distance < 150 && distance > 0) {
                     const force = (150 - distance) / 150;
                     const pushX = (deltaX / distance) * force * 50;
@@ -261,7 +261,19 @@
                     element.style.transform = `translate(${currentX + pushX}px, ${currentY + pushY}px) rotate(${rotation})`;
                 }
             });
+        }
+
+        // Mouse interaction
+        document.addEventListener('mousemove', function(e) {
+            handleInteraction(e.clientX, e.clientY);
         });
+
+        // Touch interaction for mobile
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 0) {
+                handleInteraction(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
 
         // Disable interaction during collapse
         setTimeout(() => {
