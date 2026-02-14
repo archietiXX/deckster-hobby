@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine's Day</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: {
+                    sans: ['EB Garamond', 'serif'],
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-pink-100 via-red-50 to-pink-100 min-h-screen flex items-center justify-center overflow-hidden">
+    <!-- Initial heart with "Open me" -->
+    <div id="mainHeart" class="cursor-pointer transition-transform hover:scale-110 active:scale-95">
+        <div class="text-center">
+            <!-- Heart SVG -->
+            <svg class="w-48 h-48 mx-auto mb-4 text-red-500 drop-shadow-lg animate-pulse" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+
+            <!-- Text -->
+            <p class="text-3xl font-bold text-red-600">Open me</p>
+        </div>
+    </div>
+
+    <!-- Final message -->
+    <div id="finalMessage" class="hidden text-center">
+        <!-- Heart SVG -->
+        <svg class="w-48 h-48 mx-auto mb-4 text-red-500 drop-shadow-lg animate-pulse" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+
+        <!-- Final text -->
+        <p class="text-3xl font-bold text-red-600">Давай дружить?</p>
+    </div>
+
+    <!-- Hearts container for burst animation -->
+    <div id="heartsContainer" class="fixed inset-0 pointer-events-none hidden"></div>
+
+    <script>
+        const mainHeart = document.getElementById('mainHeart');
+        const heartsContainer = document.getElementById('heartsContainer');
+        const finalMessage = document.getElementById('finalMessage');
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        let allElements = [];
+
+        mainHeart.addEventListener('click', function() {
+            // Hide main heart
+            mainHeart.classList.add('scale-0');
+
+            // Show hearts container
+            heartsContainer.classList.remove('hidden');
+
+            // Create heart burst
+            createHeartBurst();
+
+            // After 10 seconds, collapse everything back
+            setTimeout(() => {
+                collapseToCenter();
+            }, 10000);
+
+            // Show final message after collapse
+            setTimeout(() => {
+                heartsContainer.classList.add('hidden');
+                finalMessage.classList.remove('hidden');
+                finalMessage.classList.add('scale-0');
+                setTimeout(() => {
+                    finalMessage.classList.remove('scale-0');
+                    finalMessage.classList.add('transition-transform', 'duration-1000');
+                }, 50);
+            }, 13000);
+        });
+
+        const phrases = [
+            'Будешь моей Валентинкой?',
+            'Мяу-Мяу',
+            'Ты мне очень нравишься',
+            'Давай дружить?',
+            'Мне нравится, как ты пахнешь!',
+            'Ты очень хорошенькая'
+        ];
+
+        function createHeartBurst() {
+            const itemCount = 60;
+            allElements = [];
+
+            for (let i = 0; i < itemCount; i++) {
+                setTimeout(() => {
+                    // Randomly choose between heart (70%) or text (30%)
+                    if (Math.random() < 0.7) {
+                        createFloatingHeart();
+                    } else {
+                        createFloatingText();
+                    }
+                }, i * 100);
+            }
+        }
+
+        function collapseToCenter() {
+            allElements.forEach(element => {
+                const rect = element.getBoundingClientRect();
+                const currentX = rect.left + rect.width / 2;
+                const currentY = rect.top + rect.height / 2;
+
+                const deltaX = centerX - currentX;
+                const deltaY = centerY - currentY;
+
+                element.style.transitionDuration = '3s';
+                element.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0)`;
+                element.style.opacity = '0';
+            });
+        }
+
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+
+            // Random starting position
+            const startX = Math.random() * window.innerWidth;
+            const startY = Math.random() * window.innerHeight;
+
+            // Random size
+            const size = 20 + Math.random() * 40;
+
+            // Random color variation
+            const colors = ['text-red-400', 'text-red-500', 'text-red-600', 'text-pink-400', 'text-pink-500', 'text-pink-600'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            // Random animation duration (2x longer)
+            const duration = 8 + Math.random() * 8;
+
+            // Random direction (slower movement)
+            const moveX = (Math.random() - 0.5) * 300;
+            const moveY = -150 - Math.random() * 150;
+
+            heart.innerHTML = `
+                <svg class="w-full h-full ${color}" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+            `;
+
+            heart.className = 'absolute transition-all ease-out';
+            heart.style.left = startX + 'px';
+            heart.style.top = startY + 'px';
+            heart.style.width = size + 'px';
+            heart.style.height = size + 'px';
+            heart.style.opacity = '1';
+            heart.style.transitionDuration = duration + 's';
+
+            heartsContainer.appendChild(heart);
+            allElements.push(heart);
+
+            // Trigger animation
+            setTimeout(() => {
+                heart.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${Math.random() * 720 - 360}deg)`;
+                heart.style.opacity = '0.8';
+            }, 50);
+        }
+
+        function createFloatingText() {
+            const textElement = document.createElement('div');
+
+            // Random starting position
+            const startX = Math.random() * window.innerWidth;
+            const startY = Math.random() * window.innerHeight;
+
+            // Random phrase
+            const phrase = phrases[Math.floor(Math.random() * phrases.length)];
+
+            // Random font size
+            const fontSize = 16 + Math.random() * 16;
+
+            // Random color variation
+            const colors = ['text-red-500', 'text-red-600', 'text-pink-500', 'text-pink-600', 'text-rose-500', 'text-rose-600'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            // Random animation duration (2x longer)
+            const duration = 8 + Math.random() * 8;
+
+            // Random direction (slower movement)
+            const moveX = (Math.random() - 0.5) * 300;
+            const moveY = -150 - Math.random() * 150;
+
+            textElement.textContent = phrase;
+            textElement.className = `absolute transition-all ease-out font-bold ${color} whitespace-nowrap`;
+            textElement.style.left = startX + 'px';
+            textElement.style.top = startY + 'px';
+            textElement.style.fontSize = fontSize + 'px';
+            textElement.style.opacity = '1';
+            textElement.style.transitionDuration = duration + 's';
+
+            heartsContainer.appendChild(textElement);
+            allElements.push(textElement);
+
+            // Trigger animation
+            setTimeout(() => {
+                textElement.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${Math.random() * 60 - 30}deg)`;
+                textElement.style.opacity = '0.8';
+            }, 50);
+        }
+    </script>
+</body>
+</html>
