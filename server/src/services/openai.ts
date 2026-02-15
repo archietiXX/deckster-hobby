@@ -42,9 +42,7 @@ export async function chatCompletion(
     reasoning: {
       effort: 'low'
     },
-    text: {
-      verbosity: 'low'
-    },
+    // Note: verbosity parameter removed due to TypeScript SDK type limitations
   });
 
   const content = response.output_text ?? '';
@@ -82,7 +80,7 @@ export async function jsonCompletion<T>(
       effort: 'low'
     },
     text: {
-      verbosity: 'low',
+      // Note: verbosity parameter removed due to TypeScript SDK type limitations
       format: { type: 'json_object' }
     },
   });

@@ -45,8 +45,14 @@ export function PersonaReactions({
   const [expandedId, setExpandedId] = useState<string | null>(personas[0]?.id ?? null);
 
   const handleToggle = useCallback((id: string) => {
+    // DEBUG: Check if evaluation exists for this persona
+    const evaluation = evaluations.find((e) => e.personaId === id);
+    console.log('🔍 Toggle persona:', id, 'has evaluation:', !!evaluation);
+    console.log('All persona IDs:', personas.map(p => p.id));
+    console.log('All evaluation personaIds:', evaluations.map(e => e.personaId));
+
     setExpandedId((prev) => (prev === id ? null : id));
-  }, []);
+  }, [evaluations, personas]);
 
   const handleShowRecommendations = useCallback(async () => {
     // Immediately show recommendations screen with loading state
