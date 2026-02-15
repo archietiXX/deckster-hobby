@@ -107,6 +107,11 @@ export function Recommendations({
                     </span>
                   </div>
                   <p className="text-[14px] leading-[1.7] text-text-secondary">{rec.text}</p>
+                  {rec.priorityRationale && (
+                    <p className="text-[13px] leading-relaxed text-text-secondary/70 italic">
+                      {rec.priorityRationale}
+                    </p>
+                  )}
                   <div className="flex flex-wrap gap-1.5">
                     {rec.relatedPersonaIds.map((id) => (
                       <span

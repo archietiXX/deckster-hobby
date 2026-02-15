@@ -16,6 +16,7 @@ RULES:
 - Each recommendation needs a short title (3-6 words, like a headline) and a detailed explanation
 - The explanation must be specific and actionable — not vague advice
 - Tie each recommendation back to which persona(s) raised the concern
+- For each recommendation, include a priorityRationale: 1 sentence explaining WHY this recommendation is ranked at this priority level — what makes it more or less critical than the others
 - Cover different aspects where possible: content, structure, delivery, data/evidence, audience engagement
 - Be constructive but honest — the goal is to help the presenter succeed
 - The ranking must reflect real impact on the presentation goal, not just order of appearance
@@ -28,6 +29,7 @@ Respond with a JSON object:
       "title": "Short headline title",
       "text": "Detailed, actionable recommendation explaining what to change and why",
       "priority": "top",
+      "priorityRationale": "Why this is the #1 priority — what makes it the most impactful change",
       "relatedPersonaIds": ["persona-1", "persona-3"]
     },
     {
@@ -35,6 +37,7 @@ Respond with a JSON object:
       "title": "Short headline title",
       "text": "Detailed recommendation...",
       "priority": "important",
+      "priorityRationale": "Why this ranks as important but not top priority",
       "relatedPersonaIds": ["persona-2"]
     }
   ]

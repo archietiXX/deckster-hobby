@@ -34,6 +34,7 @@ export interface Recommendation {
   title: string;
   text: string;
   priority: 'top' | 'important' | 'consider';
+  priorityRationale: string;
   relatedPersonaIds: string[];
 }
 
