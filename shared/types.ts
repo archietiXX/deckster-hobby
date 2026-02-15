@@ -31,7 +31,9 @@ export interface PersonaEvaluation {
 
 export interface Recommendation {
   number: number;
+  title: string;
   text: string;
+  priority: 'top' | 'important' | 'consider';
   relatedPersonaIds: string[];
 }
 

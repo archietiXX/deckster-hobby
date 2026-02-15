@@ -7,6 +7,30 @@ interface RecommendationsProps {
   onStartOver: () => void;
 }
 
+const priorityConfig = {
+  top: {
+    label: 'Top Priority',
+    badge: 'bg-red-50 text-red-700 border-red-200',
+    accent: 'bg-red-600',
+    border: 'border-red-200 hover:border-red-300',
+    ring: 'shadow-[0_2px_12px_rgba(220,38,38,0.08)]',
+  },
+  important: {
+    label: 'Important',
+    badge: 'bg-amber-50 text-amber-700 border-amber-200',
+    accent: 'bg-amber-500',
+    border: 'border-amber-200 hover:border-amber-300',
+    ring: '',
+  },
+  consider: {
+    label: 'Consider',
+    badge: 'bg-slate-50 text-slate-600 border-slate-200',
+    accent: 'bg-slate-400',
+    border: 'border-border hover:border-gray-300',
+    ring: '',
+  },
+};
+
 export function Recommendations({
   recommendations,
   personas,
@@ -56,27 +80,33 @@ export function Recommendations({
             Recommendations
           </h1>
           <p className="text-[15px] text-text-secondary mt-1">
-            5 critical improvements synthesized from your panel's feedback.
+            5 improvements ranked by impact on your presentation goal.
           </p>
         </div>
 
         {/* List */}
         <div className="flex flex-col gap-4">
-          {recommendations.map((rec, i) => (
-            <div
-              key={rec.number}
-              className="flex gap-6 p-6 bg-bg-primary border border-border rounded-xl animate-fade-in-up transition-[border-color] duration-200 hover:border-gray-300"
-              style={{ animationDelay: `${i * 0.08}s` }}
-            >
-              <div className="w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center font-sans text-lg font-semibold shrink-0">
-                {rec.number}
-              </div>
-              <div className="flex-1 flex flex-col gap-4">
-                <p className="text-[15px] leading-[1.7] text-text-primary">{rec.text}</p>
-                <div className="flex flex-col gap-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
-                    Based on feedback from:
-                  </span>
+          {recommendations.map((rec, i) => {
+            const config = priorityConfig[rec.priority] ?? priorityConfig.consider;
+            return (
+              <div
+                key={rec.number}
+                className={`flex gap-5 p-6 bg-bg-primary border rounded-xl animate-fade-in-up transition-[border-color,box-shadow] duration-200 ${config.border} ${config.ring}`}
+                style={{ animationDelay: `${i * 0.08}s` }}
+              >
+                <div className={`w-9 h-9 rounded-full ${config.accent} text-white flex items-center justify-center font-sans text-lg font-semibold shrink-0`}>
+                  {rec.number}
+                </div>
+                <div className="flex-1 flex flex-col gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="text-[15px] font-semibold text-text-primary leading-snug">
+                      {rec.title}
+                    </h3>
+                    <span className={`px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full border ${config.badge}`}>
+                      {config.label}
+                    </span>
+                  </div>
+                  <p className="text-[14px] leading-[1.7] text-text-secondary">{rec.text}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {rec.relatedPersonaIds.map((id) => (
                       <span
@@ -89,8 +119,8 @@ export function Recommendations({
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
