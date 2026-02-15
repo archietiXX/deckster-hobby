@@ -24,7 +24,20 @@ async function parsePPTX(file: File): Promise<SlideContent[]> {
     const xml = await zip.file(sf.name)!.async('text');
     const text = extractTextFromXml(xml);
     if (text.trim()) {
-      slides.push({ slideNumber: sf.index, text: text.trim() });
+      const slide: SlideContent = { slideNumber: sf.index, text: text.trim() };
+
+      // Try to extract speaker notes from the corresponding notesSlide XML
+      const notesPath = `ppt/notesSlides/notesSlide${sf.index}.xml`;
+      const notesFile = zip.file(notesPath);
+      if (notesFile) {
+        const notesXml = await notesFile.async('text');
+        const notesText = extractTextFromXml(notesXml);
+        if (notesText.trim()) {
+          slide.notes = notesText.trim();
+        }
+      }
+
+      slides.push(slide);
     }
   }
 

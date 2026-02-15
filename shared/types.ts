@@ -58,6 +58,7 @@ export interface EvaluateRequest {
 export interface SlideContent {
   slideNumber: number;
   text: string;
+  notes?: string;
 }
 
 // SSE event types
