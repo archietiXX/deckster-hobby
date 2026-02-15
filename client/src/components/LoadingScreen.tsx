@@ -119,7 +119,7 @@ export function LoadingScreen({
                   Building your audience panel
                 </h2>
                 <p className="mt-1 text-sm text-text-secondary">
-                  Generating 5 realistic personas based on your audience selection...
+                  Generating realistic personas based on your audience selection...
                 </p>
               </div>
             </div>

@@ -5,21 +5,29 @@ export function buildRecommendationsPrompt(
   personas: Persona[],
   evaluations: PersonaEvaluation[]
 ): { system: string; user: string } {
-  const system = `You are a presentation coach synthesizing feedback from a panel of 5 audience members. Your job is to distill their reactions into 5 actionable recommendations, strictly ranked by impact.
+  // Scale recommendations with panel size: minimum 3, maximum 7
+  const recCount = Math.max(3, Math.min(evaluations.length + 1, 7));
+
+  const system = `You are a presentation coach synthesizing feedback from a panel of ${evaluations.length} audience member${evaluations.length === 1 ? '' : 's'}. Your job is to distill their reactions into ${recCount} actionable recommendations, strictly ranked by impact.
 
 PRIORITY TIERS — you must assign exactly these tiers:
 - #1 = "top" priority — the single most impactful change. This is the one thing that, if fixed, would shift the outcome most. Be ruthless — only one recommendation gets this tier.
-- #2 and #3 = "important" — high-impact changes that would meaningfully improve the presentation. These matter a lot but aren't the #1 blocker.
-- #4 and #5 = "consider" — worthwhile improvements that would polish the presentation but aren't dealbreakers.
+- #2 ${recCount >= 4 ? 'and #3 ' : ''}= "important" — high-impact changes that would meaningfully improve the presentation.
+- Remaining = "consider" — worthwhile improvements that would polish the presentation.
 
-RULES:
-- Each recommendation needs a short title (3-6 words, like a headline) and a detailed explanation
-- The explanation must be specific and actionable — not vague advice
+RULES FOR ACTIONABLE RECOMMENDATIONS:
+- Each recommendation must tell the presenter EXACTLY what to do — not vague advice
+- Reference specific slides, sections, or content when possible (e.g., "On slide 3, replace the generic market size claim with a bottom-up TAM calculation")
+- Include the specific action: add, remove, replace, restructure, reword, or move
+- If a recommendation involves adding content, describe what that content should look like
+- If a recommendation involves changing structure, explain the before and after
+- Frame recommendations as direct instructions the presenter can execute immediately
+- Each recommendation needs a short title (3-6 words, like a headline)
+- For each recommendation, include a priorityRationale: 1 sentence explaining WHY this is ranked at this priority level
 - Tie each recommendation back to which persona(s) raised the concern
-- For each recommendation, include a priorityRationale: 1 sentence explaining WHY this recommendation is ranked at this priority level — what makes it more or less critical than the others
-- Cover different aspects where possible: content, structure, delivery, data/evidence, audience engagement
-- Be constructive but honest — the goal is to help the presenter succeed
-- The ranking must reflect real impact on the presentation goal, not just order of appearance
+
+BAD example: "Improve your financial projections" — too vague
+GOOD example: "Replace the single revenue number on slide 7 with a 3-year projection table showing conservative, base, and optimistic scenarios. Include your assumptions for each."
 
 Respond with a JSON object:
 {
@@ -27,23 +35,15 @@ Respond with a JSON object:
     {
       "number": 1,
       "title": "Short headline title",
-      "text": "Detailed, actionable recommendation explaining what to change and why",
+      "text": "Specific, actionable instruction the presenter can execute immediately",
       "priority": "top",
-      "priorityRationale": "Why this is the #1 priority — what makes it the most impactful change",
+      "priorityRationale": "Why this is the #1 priority",
       "relatedPersonaIds": ["persona-1", "persona-3"]
-    },
-    {
-      "number": 2,
-      "title": "Short headline title",
-      "text": "Detailed recommendation...",
-      "priority": "important",
-      "priorityRationale": "Why this ranks as important but not top priority",
-      "relatedPersonaIds": ["persona-2"]
     }
   ]
 }
 
-priority values: "top" for #1, "important" for #2-3, "consider" for #4-5.`;
+Generate exactly ${recCount} recommendations. Priority values: "top" for #1, "important" for #2${recCount >= 4 ? '-3' : ''}, "consider" for the rest.`;
 
   const feedbackSummary = evaluations
     .map((ev) => {
@@ -63,7 +63,7 @@ Decision: ${ev.decision} [${ev.decisionSentiment}]`;
 PANEL FEEDBACK:
 ${feedbackSummary}
 
-Synthesize 5 recommendations, ranked by impact. #1 should be the single most important change.`;
+Synthesize ${recCount} recommendations, ranked by impact. Each must be specific enough that the presenter can act on it immediately — reference exact slides, sections, and content where possible.`;
 
   return { system, user };
 }

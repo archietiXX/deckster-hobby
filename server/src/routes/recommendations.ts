@@ -6,7 +6,7 @@ import { buildRecommendationsPrompt } from '../prompts/recommendations.js';
 
 export const recommendationsRouter = Router();
 
-// POST /api/recommendations — synthesize 5 recommendations from persona feedback
+// POST /api/recommendations — synthesize recommendations from persona feedback
 recommendationsRouter.post('/', async (req: Request, res: Response) => {
   const { goal, personas, evaluations } = req.body as RecommendationsRequest;
 

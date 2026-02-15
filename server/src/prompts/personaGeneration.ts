@@ -15,18 +15,36 @@ export function buildPersonaGenerationPrompt(
 
   const system = `You are an expert at simulating realistic audience members for presentation evaluations.
 
-Your task: Generate exactly 5 distinct persona definitions that represent a realistic audience panel for a presentation. Each persona should be a believable professional with a specific name, job title, background, and concerns.
+Your task: Generate a realistic audience panel for a presentation. You must decide the right NUMBER of personas based on the selected categories, presentation goal, and any additional context provided.
+
+HOW TO DETERMINE PERSONA COUNT (generate between 1 and 7 personas):
+- Some categories are inherently singular in most real-world settings:
+  • "Direct Manager" → typically 1 person
+  • "Client" → typically 1 key contact (unless context says otherwise)
+  • "Project Stakeholders" → typically 1-2 people
+  • "Department Head" → typically 1-2 people
+- Some categories are inherently plural:
+  • "C-level Executives" → 2-4 people (CEO, CFO, CTO, etc.)
+  • "Team" → 2-5 people (different roles and seniority levels)
+  • "Investors" → 2-4 people (different investment perspectives)
+  • "Board/Advisory Group" → 2-4 people
+  • "Senior Leadership" → 2-3 people
+  • "General Public" → 2-4 people (different demographics)
+  • "Potential Customers" → 2-3 people (different buyer profiles)
+  • "External Partners" → 1-2 people
+  • "Trainees/New Hires" → 2-3 people (different experience levels)
+- If only one category is selected AND it's a singular category (like Direct Manager), generate just 1 persona
+- If additional context specifies exact attendees or audience size, respect that
+- The total should feel realistic for the scenario — a pitch to your boss is 1 person, a board meeting is 4-6 people, a team presentation is 3-5 people
+- Cap at 7 personas maximum — beyond that the evaluation loses focus
 
 IMPORTANT RULES:
-- Distribute personas across the selected audience categories in a way that best serves the presentation goal
-- You may assign multiple personas to the same category if it makes strategic sense
-- Every selected category should ideally have at least one persona, but prioritize realism over coverage if there are more than 5 categories
 - Each persona must feel like a real individual with specific professional concerns
 - NAMES MUST MATCH THE CULTURAL CONTEXT of the presentation. Infer the likely country/region from the slide content, company names, language cues, or goal. If the content is German, use German names. If Japanese, use Japanese names. If American, use American names. Always use a realistic diverse mix of names from that culture — not all the same ethnicity. If no cultural signal is detectable, default to a diverse international mix.
 - Give each persona a realistic full name and specific job title
-- Personas should represent a diverse range of perspectives
+- Personas should represent a diverse range of perspectives within and across categories
 
-Respond with a JSON object containing a "personas" array with exactly 5 objects, each having:
+Respond with a JSON object containing a "personas" array, each having:
 - "id": a unique string like "persona-1", "persona-2", etc.
 - "name": realistic full name
 - "title": specific job title
@@ -36,7 +54,7 @@ Respond with a JSON object containing a "personas" array with exactly 5 objects,
 - "audienceCategoryId": the id of the audience category they belong to`;
 
   const contextBlock = audienceContext?.trim()
-    ? `\n\nADDITIONAL CONTEXT ABOUT THE AUDIENCE:\n${audienceContext.trim()}\n\nUse this context to make personas more specific and realistic. Reflect the dynamics, attitudes, and concerns described above in the personas you generate.`
+    ? `\n\nADDITIONAL CONTEXT ABOUT THE AUDIENCE:\n${audienceContext.trim()}\n\nUse this context to make personas more specific and realistic. Reflect the dynamics, attitudes, and concerns described above in the personas you generate. If specific people or roles are mentioned, model personas after them.`
     : '';
 
   const slideHint = slideTextSample
@@ -48,7 +66,7 @@ Respond with a JSON object containing a "personas" array with exactly 5 objects,
 SELECTED AUDIENCE CATEGORIES:
 ${categoryList}${contextBlock}${slideHint}
 
-Generate 5 realistic personas for this evaluation panel.`;
+Generate the right number of realistic personas for this evaluation panel. Consider which categories are singular vs. plural in a real-world setting.`;
 
   return { system, user };
 }

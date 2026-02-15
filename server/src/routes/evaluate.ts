@@ -48,7 +48,7 @@ evaluateRouter.post('/', async (req: Request, res: Response) => {
   const slideText = formatSlideText(slideContents);
 
   try {
-    // Phase 1: Generate 5 personas (pass a slide sample for cultural context detection)
+    // Phase 1: Generate personas (pass a slide sample for cultural context detection)
     const slideTextSample = slideText.slice(0, 500);
     const personas = await generatePersonas(goal, selectedCategories, audienceContext, slideTextSample);
     sendSSE(res, 'personas', personas);

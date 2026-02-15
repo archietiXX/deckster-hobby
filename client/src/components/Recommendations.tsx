@@ -80,7 +80,7 @@ export function Recommendations({
             Recommendations
           </h1>
           <p className="text-[15px] text-text-secondary mt-1">
-            5 improvements ranked by impact on your presentation goal.
+            Improvements ranked by impact on your presentation goal.
           </p>
         </div>
 
