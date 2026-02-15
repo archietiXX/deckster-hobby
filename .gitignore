@@ -3,3 +3,15 @@
 
 # Claude Code
 .claude/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment
+.env
+
+# TypeScript
+*.tsbuildinfo
