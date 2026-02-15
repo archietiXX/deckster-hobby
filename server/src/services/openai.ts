@@ -11,7 +11,7 @@ function getClient(): OpenAI {
 }
 
 function getModel(): string {
-  return process.env.OPENAI_MODEL || 'gpt-4o';
+  return process.env.OPENAI_MODEL || 'gpt-5.2';
 }
 
 function log(label: string, data: unknown) {
@@ -29,26 +29,29 @@ export async function chatCompletion(
   const id = ++callCount;
   const model = getModel();
 
-  log(`📤 CALL #${id} → ${model}`, {
-    system: systemPrompt.slice(0, 300) + (systemPrompt.length > 300 ? '...' : ''),
-    user: userMessage.slice(0, 300) + (userMessage.length > 300 ? '...' : ''),
+  log(`📤 CALL #${id} → ${model} [Responses API]`, {
+    instructions: systemPrompt.slice(0, 300) + (systemPrompt.length > 300 ? '...' : ''),
+    input: userMessage.slice(0, 300) + (userMessage.length > 300 ? '...' : ''),
   });
 
   const start = Date.now();
-  const response = await getClient().chat.completions.create({
+  const response = await getClient().responses.create({
     model,
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userMessage },
-    ],
-    temperature: 0.8,
+    instructions: systemPrompt,
+    input: userMessage,
+    reasoning: {
+      effort: 'low'
+    },
+    text: {
+      verbosity: 'low'
+    },
   });
 
-  const content = response.choices[0]?.message?.content ?? '';
+  const content = response.output_text ?? '';
   const ms = Date.now() - start;
   const usage = response.usage;
 
-  log(`📥 RESPONSE #${id} (${ms}ms) tokens: ${usage?.prompt_tokens}→${usage?.completion_tokens}`,
+  log(`📥 RESPONSE #${id} (${ms}ms) tokens: ${usage?.input_tokens}→${usage?.output_tokens}`,
     content.slice(0, 500) + (content.length > 500 ? '...' : '')
   );
 
@@ -62,27 +65,33 @@ export async function jsonCompletion<T>(
   const id = ++callCount;
   const model = getModel();
 
-  log(`📤 CALL #${id} [JSON] → ${model}`, {
-    system: systemPrompt.slice(0, 300) + (systemPrompt.length > 300 ? '...' : ''),
-    user: userMessage.slice(0, 300) + (userMessage.length > 300 ? '...' : ''),
+  // JSON mode requires mentioning 'json' in the input
+  const jsonInput = userMessage + '\n\nRespond with valid JSON.';
+
+  log(`📤 CALL #${id} [JSON] → ${model} [Responses API]`, {
+    instructions: systemPrompt.slice(0, 300) + (systemPrompt.length > 300 ? '...' : ''),
+    input: jsonInput.slice(0, 300) + (jsonInput.length > 300 ? '...' : ''),
   });
 
   const start = Date.now();
-  const response = await getClient().chat.completions.create({
+  const response = await getClient().responses.create({
     model,
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userMessage },
-    ],
-    temperature: 0.8,
-    response_format: { type: 'json_object' },
+    instructions: systemPrompt,
+    input: jsonInput,
+    reasoning: {
+      effort: 'low'
+    },
+    text: {
+      verbosity: 'low',
+      format: { type: 'json_object' }
+    },
   });
 
-  const content = response.choices[0]?.message?.content ?? '{}';
+  const content = response.output_text ?? '{}';
   const ms = Date.now() - start;
   const usage = response.usage;
 
-  log(`📥 RESPONSE #${id} [JSON] (${ms}ms) tokens: ${usage?.prompt_tokens}→${usage?.completion_tokens}`,
+  log(`📥 RESPONSE #${id} [JSON] (${ms}ms) tokens: ${usage?.input_tokens}→${usage?.output_tokens}`,
     content.slice(0, 800) + (content.length > 800 ? '...' : '')
   );
 
