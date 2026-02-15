@@ -127,6 +127,9 @@ export default function App() {
           mainAdvice={mainAdvice}
           recommendations={recommendations}
           personas={personas}
+          evaluations={evaluations}
+          overallSummary={overallSummary}
+          goal={goal}
           onBack={handleBackToResults}
           onStartOver={handleStartOver}
         />
