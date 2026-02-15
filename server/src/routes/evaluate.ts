@@ -3,6 +3,8 @@ import type { Request, Response } from 'express';
 import type { EvaluateRequest, AudienceCategory, SlideContent } from '@deckster/shared/types.js';
 import { generatePersonas } from '../services/personaGenerator.js';
 import { evaluateAsPersona } from '../services/evaluator.js';
+import { jsonCompletion } from '../services/openai.js';
+import { buildOverallSummaryPrompt } from '../prompts/overallSummary.js';
 
 // Audience category data — mirrored from client for prompt construction.
 // In a larger app this would live in the shared package, but keeping it
@@ -23,7 +25,7 @@ function formatSlideText(slides: SlideContent[]): string {
 
 // POST /api/evaluate — SSE stream of persona generation + evaluations
 evaluateRouter.post('/', async (req: Request, res: Response) => {
-  const { slideContents, goal, audienceCategoryIds } = req.body as EvaluateRequest;
+  const { slideContents, goal, audienceCategoryIds, audienceContext } = req.body as EvaluateRequest;
 
   // Validate
   if (!slideContents?.length || !goal?.trim() || !audienceCategoryIds?.length) {
@@ -46,8 +48,9 @@ evaluateRouter.post('/', async (req: Request, res: Response) => {
   const slideText = formatSlideText(slideContents);
 
   try {
-    // Phase 1: Generate 5 personas
-    const personas = await generatePersonas(goal, selectedCategories);
+    // Phase 1: Generate 5 personas (pass a slide sample for cultural context detection)
+    const slideTextSample = slideText.slice(0, 500);
+    const personas = await generatePersonas(goal, selectedCategories, audienceContext, slideTextSample);
     sendSSE(res, 'personas', personas);
 
     // Phase 2: Evaluate in parallel, streaming each result as it completes
@@ -60,7 +63,16 @@ evaluateRouter.post('/', async (req: Request, res: Response) => {
       return evaluation;
     });
 
-    await Promise.all(evaluationPromises);
+    const allEvaluations = await Promise.all(evaluationPromises);
+
+    // Phase 3: Generate overall summary with strengths/weaknesses
+    const { system: sumSystem, user: sumUser } = buildOverallSummaryPrompt(goal, personas, allEvaluations);
+    const summaryResult = await jsonCompletion<{ summary: string; strengths: string[]; weaknesses: string[] }>(sumSystem, sumUser);
+    sendSSE(res, 'summary', {
+      text: summaryResult.summary,
+      strengths: summaryResult.strengths,
+      weaknesses: summaryResult.weaknesses,
+    });
 
     sendSSE(res, 'done', {});
     res.end();

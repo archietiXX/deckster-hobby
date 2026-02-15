@@ -5,6 +5,8 @@ import { buildEvaluationPrompt } from '../prompts/evaluation.js';
 interface EvaluationResponse {
   reaction: string;
   corePoints: string[];
+  decision: string;
+  decisionSentiment: 'positive' | 'negative' | 'mixed';
 }
 
 /**
@@ -19,9 +21,16 @@ export async function evaluateAsPersona(
   const { system, user } = buildEvaluationPrompt(persona, category, goal, slideText);
   const result = await jsonCompletion<EvaluationResponse>(system, user);
 
+  const validSentiments = ['positive', 'negative', 'mixed'] as const;
+  const sentiment = validSentiments.includes(result.decisionSentiment as any)
+    ? result.decisionSentiment
+    : 'mixed';
+
   return {
     personaId: persona.id,
     reaction: result.reaction,
     corePoints: result.corePoints,
+    decision: result.decision,
+    decisionSentiment: sentiment,
   };
 }

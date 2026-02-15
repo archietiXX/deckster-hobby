@@ -32,7 +32,9 @@ Respond with a JSON object:
 Reaction: ${ev.reaction}
 
 Core Points:
-${ev.corePoints.map((p) => `- ${p}`).join('\n')}`;
+${ev.corePoints.map((p) => `- ${p}`).join('\n')}
+
+Decision: ${ev.decision}`;
     })
     .join('\n\n---\n\n');
 

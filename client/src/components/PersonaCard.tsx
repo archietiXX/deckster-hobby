@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Persona, PersonaEvaluation } from '@deckster/shared/types';
 import { audienceCategories } from '../data/audienceCategories';
 
@@ -10,8 +11,9 @@ interface PersonaCardProps {
 }
 
 export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }: PersonaCardProps) {
-  const categoryLabel =
-    audienceCategories.find((c) => c.id === persona.audienceCategoryId)?.label ?? '';
+  const category = audienceCategories.find((c) => c.id === persona.audienceCategoryId);
+  const categoryLabel = category?.label ?? '';
+  const [showThinking, setShowThinking] = useState(false);
 
   return (
     <div
@@ -53,15 +55,64 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
 
       {/* Expanded content */}
       {isExpanded && evaluation && (
-        <div className="px-6 pb-6 flex flex-col gap-6 animate-fade-in">
-          {/* Reaction paragraphs */}
-          <div className="flex flex-col gap-4">
-            {evaluation.reaction.split('\n').filter(Boolean).map((paragraph, i) => (
-              <p key={i} className="text-[15px] leading-[1.7] text-text-primary">{paragraph}</p>
-            ))}
-          </div>
+        <div className="px-6 pb-6 flex flex-col gap-5 animate-fade-in">
+          {/* 1. Decision — color-coded by sentiment */}
+          {evaluation.decision && (() => {
+            const sentiment = evaluation.decisionSentiment ?? 'mixed';
+            const styles = {
+              positive: {
+                bg: 'bg-emerald-50',
+                border: 'border-emerald-200',
+                icon: 'text-emerald-600',
+                label: 'text-emerald-700',
+              },
+              negative: {
+                bg: 'bg-red-50',
+                border: 'border-red-200',
+                icon: 'text-red-500',
+                label: 'text-red-600',
+              },
+              mixed: {
+                bg: 'bg-amber-50',
+                border: 'border-amber-200',
+                icon: 'text-amber-500',
+                label: 'text-amber-600',
+              },
+            }[sentiment];
+            return (
+              <div className={`flex gap-3 p-4 ${styles.bg} border ${styles.border} rounded-lg`}>
+                {sentiment === 'positive' && (
+                  <svg className={`w-5 h-5 ${styles.icon} shrink-0 mt-0.5`} viewBox="0 0 20 20" fill="none">
+                    <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M6.5 10.5L9 13L13.5 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+                {sentiment === 'negative' && (
+                  <svg className={`w-5 h-5 ${styles.icon} shrink-0 mt-0.5`} viewBox="0 0 20 20" fill="none">
+                    <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M7 7L13 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    <path d="M13 7L7 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                )}
+                {sentiment === 'mixed' && (
+                  <svg className={`w-5 h-5 ${styles.icon} shrink-0 mt-0.5`} viewBox="0 0 20 20" fill="none">
+                    <circle cx="10" cy="10" r="8.25" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M6.5 10H13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                )}
+                <div>
+                  <p className={`text-[11px] font-semibold uppercase tracking-wide ${styles.label} mb-1`}>
+                    Decision
+                  </p>
+                  <p className="text-[14px] leading-relaxed text-text-primary font-medium">
+                    {evaluation.decision}
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
 
-          {/* Core points */}
+          {/* 2. Core points */}
           <div className="p-4 bg-bg-secondary border border-border rounded-lg">
             <h4 className="text-xs font-semibold uppercase tracking-wide text-accent mb-2">
               Core Points
@@ -75,20 +126,40 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
             </ul>
           </div>
 
-          {/* Background context */}
-          <div className="pt-4 border-t border-border">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary mb-2">
-              About this reviewer
-            </p>
-            <p className="text-[13px] leading-relaxed text-text-secondary">{persona.background}</p>
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {persona.keyConcerns.map((concern, i) => (
-                <span key={i} className="px-2.5 py-0.5 bg-bg-secondary border border-border rounded-full text-[11px] text-text-secondary">
-                  {concern}
-                </span>
-              ))}
-            </div>
+          {/* 3. Detailed thinking — expandable */}
+          <div>
+            <button
+              className="flex items-center gap-1.5 text-[13px] text-text-secondary hover:text-text-primary transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 font-sans"
+              onClick={() => setShowThinking((prev) => !prev)}
+              type="button"
+            >
+              <svg
+                className={`w-4 h-4 transition-transform duration-200 ${showThinking ? 'rotate-90' : ''}`}
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {showThinking ? 'Hide' : 'See'} detailed thinking
+            </button>
+            {showThinking && (
+              <div className="mt-3 border-l-2 border-accent/20 pl-4 flex flex-col gap-1 animate-fade-in">
+                {evaluation.reaction.split('\n').filter(Boolean).map((line, i) => (
+                  <p key={i} className="text-[14px] leading-[1.6] text-text-primary/80 italic">{line}</p>
+                ))}
+              </div>
+            )}
           </div>
+
+          {/* Evidence type */}
+          {category?.evidenceType && (
+            <div className="pt-4 border-t border-border">
+              <p className="text-[13px] leading-relaxed text-text-secondary">
+                <span className="text-[11px] font-semibold uppercase tracking-wide">Looks for:</span>{' '}
+                {category.evidenceType}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -5,6 +5,7 @@ import type {
   Persona,
   PersonaEvaluation,
   Recommendation,
+  OverallSummary,
 } from '@deckster/shared/types';
 import { FileDropZone } from './components/FileDropZone';
 import { SetupModal } from './components/SetupModal';
@@ -17,9 +18,11 @@ export default function App() {
   const [slideContents, setSlideContents] = useState<SlideContent[]>([]);
   const [goal, setGoal] = useState('');
   const [selectedAudiences, setSelectedAudiences] = useState<string[]>([]);
+  const [audienceContext, setAudienceContext] = useState('');
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [evaluations, setEvaluations] = useState<PersonaEvaluation[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [overallSummary, setOverallSummary] = useState<OverallSummary | null>(null);
   const [fileName, setFileName] = useState('');
 
   const handleFileParsed = useCallback((contents: SlideContent[], name: string) => {
@@ -40,6 +43,10 @@ export default function App() {
     setEvaluations(prev => [...prev, evaluation]);
   }, []);
 
+  const handleSummary = useCallback((summary: OverallSummary) => {
+    setOverallSummary(summary);
+  }, []);
+
   const handleAllEvaluationsComplete = useCallback(() => {
     setScreen('results');
   }, []);
@@ -58,9 +65,11 @@ export default function App() {
     setSlideContents([]);
     setGoal('');
     setSelectedAudiences([]);
+    setAudienceContext('');
     setPersonas([]);
     setEvaluations([]);
     setRecommendations([]);
+    setOverallSummary(null);
     setFileName('');
   }, []);
 
@@ -77,6 +86,8 @@ export default function App() {
           onGoalChange={setGoal}
           selectedAudiences={selectedAudiences}
           onAudiencesChange={setSelectedAudiences}
+          audienceContext={audienceContext}
+          onAudienceContextChange={setAudienceContext}
           onEvaluate={handleEvaluate}
           onBack={handleStartOver}
         />
@@ -87,8 +98,10 @@ export default function App() {
           slideContents={slideContents}
           goal={goal}
           audienceCategoryIds={selectedAudiences}
+          audienceContext={audienceContext}
           onPersonasGenerated={handlePersonasGenerated}
           onEvaluationComplete={handleEvaluationComplete}
+          onSummary={handleSummary}
           onAllComplete={handleAllEvaluationsComplete}
         />
       )}
@@ -98,6 +111,7 @@ export default function App() {
           personas={personas}
           evaluations={evaluations}
           goal={goal}
+          overallSummary={overallSummary}
           onShowRecommendations={handleShowRecommendations}
           onStartOver={handleStartOver}
         />

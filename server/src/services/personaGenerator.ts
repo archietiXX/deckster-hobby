@@ -8,9 +8,11 @@ interface PersonaGenerationResponse {
 
 export async function generatePersonas(
   goal: string,
-  categories: AudienceCategory[]
+  categories: AudienceCategory[],
+  audienceContext?: string,
+  slideTextSample?: string
 ): Promise<Persona[]> {
-  const { system, user } = buildPersonaGenerationPrompt(goal, categories);
+  const { system, user } = buildPersonaGenerationPrompt(goal, categories, audienceContext, slideTextSample);
   const result = await jsonCompletion<PersonaGenerationResponse>(system, user);
   return result.personas;
 }

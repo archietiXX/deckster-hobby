@@ -23,8 +23,10 @@ export interface Persona {
 
 export interface PersonaEvaluation {
   personaId: string;
-  reaction: string;       // 2 paragraphs of natural reaction
+  reaction: string;       // Inner-monologue style reaction with slide-specific stops
   corePoints: string[];   // 3-5 bullet points
+  decision: string;       // Final verdict personalized to the deck's goal
+  decisionSentiment: 'positive' | 'negative' | 'mixed'; // For color-coding the verdict
 }
 
 export interface Recommendation {
@@ -33,12 +35,21 @@ export interface Recommendation {
   relatedPersonaIds: string[];
 }
 
+// ── Overall Summary ──
+
+export interface OverallSummary {
+  text: string;
+  strengths: string[];
+  weaknesses: string[];
+}
+
 // ── API Request / Response ──
 
 export interface EvaluateRequest {
   slideContents: SlideContent[];
   goal: string;
   audienceCategoryIds: string[];
+  audienceContext?: string; // Optional additional context about the audience
 }
 
 export interface SlideContent {
@@ -50,6 +61,7 @@ export interface SlideContent {
 export type SSEEvent =
   | { type: 'personas'; data: Persona[] }
   | { type: 'evaluation'; data: PersonaEvaluation }
+  | { type: 'summary'; data: OverallSummary }
   | { type: 'error'; data: { message: string } }
   | { type: 'done' };
 

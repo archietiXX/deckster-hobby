@@ -4,11 +4,13 @@ import type {
   PersonaEvaluation,
   Recommendation,
   RecommendationsResponse,
+  OverallSummary,
 } from '@deckster/shared/types';
 
 interface EvaluateCallbacks {
   onPersonas: (personas: Persona[]) => void;
   onEvaluation: (evaluation: PersonaEvaluation) => void;
+  onSummary: (summary: OverallSummary) => void;
   onDone: () => void;
   onError: (message: string) => void;
 }
@@ -24,12 +26,13 @@ export async function startEvaluation(
   slideContents: SlideContent[],
   goal: string,
   audienceCategoryIds: string[],
+  audienceContext: string | undefined,
   callbacks: EvaluateCallbacks
 ): Promise<void> {
   const response = await fetch('/api/evaluate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ slideContents, goal, audienceCategoryIds }),
+    body: JSON.stringify({ slideContents, goal, audienceCategoryIds, ...(audienceContext && { audienceContext }) }),
   });
 
   if (!response.ok) {
@@ -75,6 +78,9 @@ export async function startEvaluation(
               break;
             case 'evaluation':
               callbacks.onEvaluation(parsed);
+              break;
+            case 'summary':
+              callbacks.onSummary(parsed);
               break;
             case 'done':
               callbacks.onDone();

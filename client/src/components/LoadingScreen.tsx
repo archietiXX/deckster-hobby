@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import type { SlideContent, Persona, PersonaEvaluation } from '@deckster/shared/types';
+import type { SlideContent, Persona, PersonaEvaluation, OverallSummary } from '@deckster/shared/types';
 import { startEvaluation } from '../services/api';
 import { audienceCategories } from '../data/audienceCategories';
 
@@ -7,8 +7,10 @@ interface LoadingScreenProps {
   slideContents: SlideContent[];
   goal: string;
   audienceCategoryIds: string[];
+  audienceContext?: string;
   onPersonasGenerated: (personas: Persona[]) => void;
   onEvaluationComplete: (evaluation: PersonaEvaluation) => void;
+  onSummary: (summary: OverallSummary) => void;
   onAllComplete: () => void;
 }
 
@@ -17,10 +19,12 @@ export function LoadingScreen({
   goal,
   audienceCategoryIds,
   onPersonasGenerated,
+  audienceContext,
   onEvaluationComplete,
+  onSummary,
   onAllComplete,
 }: LoadingScreenProps) {
-  const [phase, setPhase] = useState<'generating' | 'evaluating' | 'error'>('generating');
+  const [phase, setPhase] = useState<'generating' | 'evaluating' | 'summarizing' | 'error'>('generating');
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState('');
@@ -30,15 +34,26 @@ export function LoadingScreen({
     if (startedRef.current) return;
     startedRef.current = true;
 
-    startEvaluation(slideContents, goal, audienceCategoryIds, {
+    let personaCount = 0;
+    let evalCount = 0;
+
+    startEvaluation(slideContents, goal, audienceCategoryIds, audienceContext, {
       onPersonas: (newPersonas) => {
+        personaCount = newPersonas.length;
         setPersonas(newPersonas);
         setPhase('evaluating');
         onPersonasGenerated(newPersonas);
       },
       onEvaluation: (evaluation) => {
+        evalCount++;
         setCompletedIds((prev) => new Set(prev).add(evaluation.personaId));
         onEvaluationComplete(evaluation);
+        if (evalCount >= personaCount) {
+          setPhase('summarizing');
+        }
+      },
+      onSummary: (summary) => {
+        onSummary(summary);
       },
       onDone: () => {
         onAllComplete();
@@ -85,6 +100,15 @@ export function LoadingScreen({
                     : 'bg-success'
               }`}
             />
+            <div
+              className={`h-1 w-8 rounded-full transition-colors duration-500 ${
+                phase === 'summarizing'
+                  ? 'animate-pulse-dot bg-accent'
+                  : phase === 'generating' || phase === 'evaluating'
+                    ? 'bg-border'
+                    : 'bg-success'
+              }`}
+            />
           </div>
 
           {phase === 'generating' && (
@@ -110,6 +134,20 @@ export function LoadingScreen({
                 </h2>
                 <p className="mt-1 text-sm text-text-secondary">
                   {completedIds.size} of {personas.length} evaluations complete
+                </p>
+              </div>
+            </div>
+          )}
+
+          {phase === 'summarizing' && (
+            <div className="flex items-start gap-4">
+              <div className="mt-0.5 h-6 w-6 shrink-0 animate-spin-slow rounded-full border-2 border-border border-t-accent" />
+              <div>
+                <h2 className="font-sans text-[22px] font-normal leading-tight tracking-tight">
+                  Synthesizing overall assessment
+                </h2>
+                <p className="mt-1 text-sm text-text-secondary">
+                  Combining all panel feedback into a verdict...
                 </p>
               </div>
             </div>

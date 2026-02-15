@@ -8,6 +8,8 @@ interface SetupModalProps {
   onGoalChange: (goal: string) => void;
   selectedAudiences: string[];
   onAudiencesChange: (audiences: string[]) => void;
+  audienceContext: string;
+  onAudienceContextChange: (context: string) => void;
   onEvaluate: () => void;
   onBack: () => void;
 }
@@ -18,6 +20,8 @@ export function SetupModal({
   onGoalChange,
   selectedAudiences,
   onAudiencesChange,
+  audienceContext,
+  onAudienceContextChange,
   onEvaluate,
   onBack,
 }: SetupModalProps) {
@@ -111,6 +115,25 @@ export function SetupModal({
               {selectedAudiences.length} audience{selectedAudiences.length !== 1 ? 's' : ''} selected
             </p>
           )}
+        </div>
+
+        {/* Additional context (optional) */}
+        <div className="flex flex-col gap-3 animate-fade-in-up [animation-delay:130ms]">
+          <label className="flex items-center gap-2 text-base font-medium text-text-primary" htmlFor="context-input">
+            <span className="inline-flex items-center justify-center w-6 h-6 bg-bg-secondary text-text-secondary text-[13px] font-semibold rounded-full shrink-0 border border-border">
+              3
+            </span>
+            Additional context
+            <span className="text-[13px] font-normal text-gray-400 ml-auto">Optional</span>
+          </label>
+          <textarea
+            id="context-input"
+            className="w-full p-4 bg-white border-[1.5px] border-border rounded-lg text-text-primary text-[15px] leading-relaxed resize-y transition-[border-color,box-shadow] duration-200 placeholder:text-gray-400 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+            placeholder="e.g., The CFO is skeptical about AI spending, the CTO wants technical depth, most attendees saw last quarter's results..."
+            value={audienceContext}
+            onChange={(e) => onAudienceContextChange(e.target.value)}
+            rows={2}
+          />
         </div>
 
         {/* Evaluate button */}
