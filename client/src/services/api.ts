@@ -106,7 +106,7 @@ export async function fetchRecommendations(
   goal: string,
   personas: Persona[],
   evaluations: PersonaEvaluation[]
-): Promise<Recommendation[]> {
+): Promise<RecommendationsResponse> {
   const response = await fetch('/api/recommendations', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -118,6 +118,5 @@ export async function fetchRecommendations(
     throw new Error(error.error || `HTTP ${response.status}`);
   }
 
-  const data: RecommendationsResponse = await response.json();
-  return data.recommendations;
+  return response.json();
 }

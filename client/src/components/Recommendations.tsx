@@ -1,6 +1,7 @@
 import type { Recommendation, Persona } from '@deckster/shared/types';
 
 interface RecommendationsProps {
+  mainAdvice: string;
   recommendations: Recommendation[];
   personas: Persona[];
   onBack: () => void;
@@ -32,6 +33,7 @@ const priorityConfig = {
 };
 
 export function Recommendations({
+  mainAdvice,
   recommendations,
   personas,
   onBack,
@@ -84,8 +86,32 @@ export function Recommendations({
           </p>
         </div>
 
+        {/* Main advice */}
+        {mainAdvice && (
+          <div className="p-5 bg-accent/[0.03] border border-accent/15 rounded-xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <div className="flex items-center gap-2 mb-2.5">
+              <svg className="w-5 h-5 text-accent shrink-0" viewBox="0 0 20 20" fill="none">
+                <path d="M10 2L12.09 7.26L18 8.27L14 12.14L14.81 18.02L10 15.27L5.19 18.02L6 12.14L2 8.27L7.91 7.26L10 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <h2 className="text-[13px] font-semibold uppercase tracking-wide text-accent">
+                Main Advice
+              </h2>
+            </div>
+            <p className="text-[15px] leading-[1.7] text-text-primary">
+              {mainAdvice}
+            </p>
+          </div>
+        )}
+
+        {/* Practical recommendations */}
+        <div className="flex flex-col gap-1.5">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
+            Practical Steps
+          </h2>
+        </div>
+
         {/* List */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 -mt-4">
           {recommendations.map((rec, i) => {
             const config = priorityConfig[rec.priority] ?? priorityConfig.consider;
             return (

@@ -75,6 +75,7 @@ export interface RecommendationsRequest {
 }
 
 export interface RecommendationsResponse {
+  mainAdvice: string;
   recommendations: Recommendation[];
 }
 

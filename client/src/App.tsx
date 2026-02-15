@@ -5,6 +5,7 @@ import type {
   Persona,
   PersonaEvaluation,
   Recommendation,
+  RecommendationsResponse,
   OverallSummary,
 } from '@deckster/shared/types';
 import { FileDropZone } from './components/FileDropZone';
@@ -22,6 +23,7 @@ export default function App() {
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [evaluations, setEvaluations] = useState<PersonaEvaluation[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [mainAdvice, setMainAdvice] = useState('');
   const [overallSummary, setOverallSummary] = useState<OverallSummary | null>(null);
   const [fileName, setFileName] = useState('');
 
@@ -51,8 +53,9 @@ export default function App() {
     setScreen('results');
   }, []);
 
-  const handleShowRecommendations = useCallback((recs: Recommendation[]) => {
-    setRecommendations(recs);
+  const handleShowRecommendations = useCallback((result: RecommendationsResponse) => {
+    setMainAdvice(result.mainAdvice);
+    setRecommendations(result.recommendations);
     setScreen('recommendations');
   }, []);
 
@@ -69,6 +72,7 @@ export default function App() {
     setPersonas([]);
     setEvaluations([]);
     setRecommendations([]);
+    setMainAdvice('');
     setOverallSummary(null);
     setFileName('');
   }, []);
@@ -119,6 +123,7 @@ export default function App() {
 
       {screen === 'recommendations' && (
         <Recommendations
+          mainAdvice={mainAdvice}
           recommendations={recommendations}
           personas={personas}
           onBack={handleBackToResults}

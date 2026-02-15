@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import type { Persona, PersonaEvaluation, Recommendation, OverallSummary } from '@deckster/shared/types';
+import type { Persona, PersonaEvaluation, Recommendation, RecommendationsResponse, OverallSummary } from '@deckster/shared/types';
 import { fetchRecommendations } from '../services/api';
 import { PersonaCard } from './PersonaCard';
 
@@ -24,7 +24,7 @@ interface PersonaReactionsProps {
   evaluations: PersonaEvaluation[];
   goal: string;
   overallSummary: OverallSummary | null;
-  onShowRecommendations: (recs: Recommendation[]) => void;
+  onShowRecommendations: (result: RecommendationsResponse) => void;
   onStartOver: () => void;
 }
 
@@ -49,8 +49,8 @@ export function PersonaReactions({
     setIsLoadingRecs(true);
     setRecsError('');
     try {
-      const recs = await fetchRecommendations(goal, personas, evaluations);
-      onShowRecommendations(recs);
+      const result = await fetchRecommendations(goal, personas, evaluations);
+      onShowRecommendations(result);
     } catch (err) {
       setRecsError(err instanceof Error ? err.message : 'Failed to generate recommendations');
     } finally {

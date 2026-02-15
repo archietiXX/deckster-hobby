@@ -29,8 +29,12 @@ RULES FOR ACTIONABLE RECOMMENDATIONS:
 BAD example: "Improve your financial projections" — too vague
 GOOD example: "Replace the single revenue number on slide 7 with a 3-year projection table showing conservative, base, and optimistic scenarios. Include your assumptions for each."
 
+MAIN ADVICE:
+Before listing specific recommendations, provide a "mainAdvice" — a 2-3 sentence high-level assessment of the presentation's core issue or biggest opportunity. This should capture the overarching theme across all panel feedback: what's the fundamental thing this presentation gets right or wrong? Think of it as the one piece of advice a mentor would give over coffee — strategic, honest, and clear. It should feel different from the specific recommendations below (those are tactical; this is strategic).
+
 Respond with a JSON object:
 {
+  "mainAdvice": "2-3 sentence strategic assessment — the overarching theme of what this presentation needs most",
   "recommendations": [
     {
       "number": 1,
