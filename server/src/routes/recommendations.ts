@@ -8,7 +8,7 @@ export const recommendationsRouter = Router();
 
 // POST /api/recommendations — synthesize recommendations from persona feedback
 recommendationsRouter.post('/', async (req: Request, res: Response) => {
-  const { goal, personas, evaluations } = req.body as RecommendationsRequest;
+  const { goal, personas, evaluations, slideContents } = req.body as RecommendationsRequest;
 
   if (!goal?.trim() || !personas?.length || !evaluations?.length) {
     res.status(400).json({ error: 'Missing required fields: goal, personas, evaluations' });
@@ -16,7 +16,7 @@ recommendationsRouter.post('/', async (req: Request, res: Response) => {
   }
 
   try {
-    const { system, user } = buildRecommendationsPrompt(goal, personas, evaluations);
+    const { system, user } = buildRecommendationsPrompt(goal, personas, evaluations, slideContents);
     const result = await jsonCompletion<RecommendationsResponse>(system, user);
     res.json(result);
   } catch (err) {

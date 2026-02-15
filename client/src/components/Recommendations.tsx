@@ -135,6 +135,7 @@ export function Recommendations({
                   <p className="text-[14px] leading-[1.7] text-text-secondary">{rec.text}</p>
                   {rec.priorityRationale && (
                     <p className="text-[13px] leading-relaxed text-text-secondary/70 italic">
+                      <span className="font-semibold not-italic text-text-secondary">Why?</span>{' '}
                       {rec.priorityRationale}
                     </p>
                   )}

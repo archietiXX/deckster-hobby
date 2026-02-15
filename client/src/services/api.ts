@@ -105,12 +105,13 @@ export async function startEvaluation(
 export async function fetchRecommendations(
   goal: string,
   personas: Persona[],
-  evaluations: PersonaEvaluation[]
+  evaluations: PersonaEvaluation[],
+  slideContents: SlideContent[]
 ): Promise<RecommendationsResponse> {
   const response = await fetch('/api/recommendations', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ goal, personas, evaluations }),
+    body: JSON.stringify({ goal, personas, evaluations, slideContents }),
   });
 
   if (!response.ok) {

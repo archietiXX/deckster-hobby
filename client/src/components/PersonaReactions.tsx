@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import type { Persona, PersonaEvaluation, Recommendation, RecommendationsResponse, OverallSummary } from '@deckster/shared/types';
+import type { Persona, PersonaEvaluation, Recommendation, RecommendationsResponse, OverallSummary, SlideContent } from '@deckster/shared/types';
 import { fetchRecommendations } from '../services/api';
 import { PersonaCard } from './PersonaCard';
 
@@ -23,6 +23,7 @@ interface PersonaReactionsProps {
   personas: Persona[];
   evaluations: PersonaEvaluation[];
   goal: string;
+  slideContents: SlideContent[];
   overallSummary: OverallSummary | null;
   onShowRecommendations: (result: RecommendationsResponse) => void;
   onStartOver: () => void;
@@ -32,6 +33,7 @@ export function PersonaReactions({
   personas,
   evaluations,
   goal,
+  slideContents,
   overallSummary,
   onShowRecommendations,
   onStartOver,
@@ -49,7 +51,7 @@ export function PersonaReactions({
     setIsLoadingRecs(true);
     setRecsError('');
     try {
-      const result = await fetchRecommendations(goal, personas, evaluations);
+      const result = await fetchRecommendations(goal, personas, evaluations, slideContents);
       onShowRecommendations(result);
     } catch (err) {
       setRecsError(err instanceof Error ? err.message : 'Failed to generate recommendations');
@@ -144,7 +146,7 @@ export function PersonaReactions({
           )}
           {/* Strengths & Weaknesses — stacked */}
           {overallSummary && (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-6">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600 mb-1.5">
                   What works well
@@ -172,12 +174,17 @@ export function PersonaReactions({
             </div>
           )}
           {/* Recommendations CTA */}
-          <div className="flex items-center justify-between pt-2 border-t border-black/5">
-            <p className="text-[13px] text-text-secondary">
-              Want to improve your score?
-            </p>
+          <div className="mt-1 p-4 bg-accent/[0.04] border border-accent/15 rounded-lg flex items-center justify-between gap-4">
+            <div>
+              <p className="text-[14px] font-semibold text-text-primary">
+                Want to improve your score?
+              </p>
+              <p className="text-[13px] text-text-secondary mt-0.5">
+                Get actionable steps to strengthen your presentation.
+              </p>
+            </div>
             <button
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-accent border-none rounded-lg text-white font-sans text-[13px] font-semibold cursor-pointer transition-all duration-200 hover:enabled:bg-accent-hover disabled:opacity-70 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-accent border-none rounded-lg text-white font-sans text-[13px] font-semibold cursor-pointer transition-all duration-200 whitespace-nowrap shrink-0 hover:enabled:bg-accent-hover disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_1px_3px_rgba(0,21,255,0.2)]"
               onClick={handleShowRecommendations}
               disabled={isLoadingRecs}
               type="button"

@@ -115,6 +115,7 @@ export default function App() {
           personas={personas}
           evaluations={evaluations}
           goal={goal}
+          slideContents={slideContents}
           overallSummary={overallSummary}
           onShowRecommendations={handleShowRecommendations}
           onStartOver={handleStartOver}

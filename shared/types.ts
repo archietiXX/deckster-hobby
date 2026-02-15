@@ -72,6 +72,7 @@ export interface RecommendationsRequest {
   goal: string;
   personas: Persona[];
   evaluations: PersonaEvaluation[];
+  slideContents: SlideContent[];
 }
 
 export interface RecommendationsResponse {
