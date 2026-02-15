@@ -1,5 +1,6 @@
 import type { Recommendation, Persona, PersonaEvaluation, OverallSummary } from '@deckster/shared/types';
 import { generateReport } from '../services/pdfExport';
+import { Footer } from './Footer';
 
 interface RecommendationsProps {
   mainAdvice: string;
@@ -231,6 +232,7 @@ export function Recommendations({
           </>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

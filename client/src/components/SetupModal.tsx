@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { audienceCategories } from '../data/audienceCategories';
 import { AudienceChip } from './AudienceChip';
+import { Footer } from './Footer';
 
 interface SetupModalProps {
   fileName: string;
@@ -158,6 +159,7 @@ export function SetupModal({
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

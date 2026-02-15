@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import type { SlideContent } from '@deckster/shared/types';
 import { parseFile } from '../services/fileParser';
+import { Footer } from './Footer';
 
 interface FileDropZoneProps {
   onFileParsed: (contents: SlideContent[], fileName: string) => void;
@@ -166,6 +167,7 @@ export function FileDropZone({ onFileParsed }: FileDropZoneProps) {
           Stress-test your presentation against realistic audience expectations.
         </p>
       </div>
+      <Footer />
     </div>
   );
 }

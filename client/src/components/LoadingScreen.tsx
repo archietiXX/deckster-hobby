@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import type { SlideContent, Persona, PersonaEvaluation, OverallSummary } from '@deckster/shared/types';
 import { startEvaluation } from '../services/api';
 import { audienceCategories } from '../data/audienceCategories';
+import { Footer } from './Footer';
 
 interface LoadingScreenProps {
   slideContents: SlideContent[];
@@ -29,6 +30,14 @@ export function LoadingScreen({
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState('');
   const startedRef = useRef(false);
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsed((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (startedRef.current) return;
@@ -67,6 +76,12 @@ export function LoadingScreen({
 
   const getCategoryLabel = (categoryId: string) =>
     audienceCategories.find((c) => c.id === categoryId)?.label ?? categoryId;
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-bg-primary">
@@ -120,6 +135,9 @@ export function LoadingScreen({
                 </h2>
                 <p className="mt-1 text-sm text-text-secondary">
                   Generating realistic personas based on your audience selection...
+                  <span className="text-[12px] text-text-secondary/60 ml-2">
+                    {formatTime(elapsed)}
+                  </span>
                 </p>
               </div>
             </div>
@@ -134,6 +152,12 @@ export function LoadingScreen({
                 </h2>
                 <p className="mt-1 text-sm text-text-secondary">
                   {completedIds.size} of {personas.length} evaluations complete
+                  <span className="text-[12px] text-text-secondary/60 ml-2">
+                    {formatTime(elapsed)}
+                  </span>
+                </p>
+                <p className="mt-1 text-[12px] text-text-secondary/60">
+                  Usually takes 20–40 seconds
                 </p>
               </div>
             </div>
@@ -148,6 +172,9 @@ export function LoadingScreen({
                 </h2>
                 <p className="mt-1 text-sm text-text-secondary">
                   Combining all panel feedback into a verdict...
+                  <span className="text-[12px] text-text-secondary/60 ml-2">
+                    {formatTime(elapsed)}
+                  </span>
                 </p>
               </div>
             </div>
@@ -230,6 +257,7 @@ export function LoadingScreen({
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

@@ -1,10 +1,11 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import type { Persona, PersonaEvaluation, Recommendation, RecommendationsResponse, OverallSummary, SlideContent } from '@deckster/shared/types';
 import { fetchRecommendations } from '../services/api';
 import { PersonaCard } from './PersonaCard';
+import { Footer } from './Footer';
 
 function computeSuccessScore(evaluations: PersonaEvaluation[]) {
-  if (evaluations.length === 0) return { percent: 0, label: 'No data', color: 'text-text-secondary', bg: 'bg-bg-secondary', bar: 'bg-border' };
+  if (evaluations.length === 0) return { percent: 0, label: 'No data', color: 'text-text-secondary', bg: 'bg-bg-secondary', bar: 'bg-border', borderAccent: 'border-border' };
   const total = evaluations.reduce((sum, ev) => {
     if (ev.decisionSentiment === 'positive') return sum + 1;
     if (ev.decisionSentiment === 'mixed') return sum + 0.5;
@@ -12,11 +13,11 @@ function computeSuccessScore(evaluations: PersonaEvaluation[]) {
   }, 0);
   const percent = Math.round((total / evaluations.length) * 100);
 
-  if (percent >= 80) return { percent, label: 'High chance', color: 'text-emerald-700', bg: 'bg-emerald-50', bar: 'bg-emerald-500' };
-  if (percent >= 60) return { percent, label: 'Good chance', color: 'text-emerald-600', bg: 'bg-emerald-50', bar: 'bg-emerald-400' };
-  if (percent >= 40) return { percent, label: 'Moderate', color: 'text-amber-600', bg: 'bg-amber-50', bar: 'bg-amber-400' };
-  if (percent >= 20) return { percent, label: 'Challenging', color: 'text-orange-600', bg: 'bg-orange-50', bar: 'bg-orange-400' };
-  return { percent, label: 'Low chance', color: 'text-red-600', bg: 'bg-red-50', bar: 'bg-red-500' };
+  if (percent >= 80) return { percent, label: 'High chance', color: 'text-emerald-700', bg: 'bg-emerald-50', bar: 'bg-emerald-500', borderAccent: 'border-emerald-300' };
+  if (percent >= 60) return { percent, label: 'Good chance', color: 'text-emerald-600', bg: 'bg-emerald-50', bar: 'bg-emerald-400', borderAccent: 'border-emerald-200' };
+  if (percent >= 40) return { percent, label: 'Moderate', color: 'text-amber-600', bg: 'bg-amber-50', bar: 'bg-amber-400', borderAccent: 'border-amber-200' };
+  if (percent >= 20) return { percent, label: 'Challenging', color: 'text-orange-600', bg: 'bg-orange-50', bar: 'bg-orange-400', borderAccent: 'border-orange-300' };
+  return { percent, label: 'Low chance', color: 'text-red-600', bg: 'bg-red-50', bar: 'bg-red-500', borderAccent: 'border-red-300' };
 }
 
 interface PersonaReactionsProps {
@@ -42,12 +43,15 @@ export function PersonaReactions({
   const [expandedId, setExpandedId] = useState<string | null>(personas[0]?.id ?? null);
   const [isLoadingRecs, setIsLoadingRecs] = useState(false);
   const [recsError, setRecsError] = useState('');
+  const isRequestingRef = useRef(false);
 
   const handleToggle = useCallback((id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
   }, []);
 
   const handleShowRecommendations = useCallback(async () => {
+    if (isRequestingRef.current) return;
+    isRequestingRef.current = true;
     setIsLoadingRecs(true);
     setRecsError('');
     try {
@@ -57,6 +61,7 @@ export function PersonaReactions({
       setRecsError(err instanceof Error ? err.message : 'Failed to generate recommendations');
     } finally {
       setIsLoadingRecs(false);
+      isRequestingRef.current = false;
     }
   }, [goal, personas, evaluations, onShowRecommendations]);
 
@@ -72,11 +77,11 @@ export function PersonaReactions({
         }}
       />
 
-      <div className="relative z-[1] w-full max-w-2xl px-6 py-12 flex flex-col gap-8 animate-fade-in">
+      <div className="relative z-[1] w-full max-w-2xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-6 sm:gap-8 animate-fade-in">
         {/* Header */}
-        <div className="flex items-start justify-between gap-6 animate-fade-in-up">
+        <div className="flex items-start justify-between gap-4 sm:gap-6 animate-fade-in-up">
           <div>
-            <h1 className="font-sans text-[32px] font-normal tracking-tight text-text-primary">
+            <h1 className="font-sans text-[24px] sm:text-[32px] font-normal tracking-tight text-text-primary">
               Panel Reactions
             </h1>
             <p className="text-[15px] text-text-secondary mt-1">
@@ -93,7 +98,7 @@ export function PersonaReactions({
         </div>
 
         {/* Overall Assessment */}
-        <div className={`${score.bg} border border-border rounded-xl p-6 flex flex-col gap-4 animate-fade-in-up`} style={{ animationDelay: '0.05s' }}>
+        <div className={`${score.bg} border ${score.borderAccent} rounded-xl p-4 sm:p-6 flex flex-col gap-4 animate-fade-in-up`} style={{ animationDelay: '0.05s' }}>
           {/* Goal reference */}
           <p className="text-[13px] text-text-secondary leading-relaxed">
             <span className="text-[11px] font-semibold uppercase tracking-wide">Goal:</span>{' '}
@@ -174,7 +179,7 @@ export function PersonaReactions({
             </div>
           )}
           {/* Recommendations CTA */}
-          <div className="mt-1 p-4 bg-accent/[0.04] border border-accent/15 rounded-lg flex items-center justify-between gap-4">
+          <div className="mt-1 p-4 bg-accent/[0.04] border border-accent/15 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div>
               <p className="text-[14px] font-semibold text-text-primary">
                 Want to improve your score?
@@ -184,7 +189,7 @@ export function PersonaReactions({
               </p>
             </div>
             <button
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-accent border-none rounded-lg text-white font-sans text-[13px] font-semibold cursor-pointer transition-all duration-200 whitespace-nowrap shrink-0 hover:enabled:bg-accent-hover disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_1px_3px_rgba(0,21,255,0.2)]"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-accent border-none rounded-lg text-white font-sans text-[13px] font-semibold cursor-pointer transition-all duration-200 whitespace-nowrap shrink-0 w-full sm:w-auto justify-center hover:enabled:bg-accent-hover disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_1px_3px_rgba(0,21,255,0.2)]"
               onClick={handleShowRecommendations}
               disabled={isLoadingRecs}
               type="button"
@@ -233,6 +238,7 @@ export function PersonaReactions({
         </div>
 
       </div>
+      <Footer />
     </div>
   );
 }

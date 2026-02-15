@@ -26,11 +26,11 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
     >
       {/* Header -- always visible */}
       <button
-        className="flex items-center gap-4 w-full px-6 py-4 bg-transparent border-none text-inherit cursor-pointer text-left font-sans hover:bg-bg-secondary/50"
+        className="flex items-center gap-3 sm:gap-4 w-full px-4 sm:px-6 py-3 sm:py-4 bg-transparent border-none text-inherit cursor-pointer text-left font-sans hover:bg-bg-secondary/50"
         onClick={onToggle}
         type="button"
       >
-        <div className="w-11 h-11 rounded-full bg-accent/10 text-accent flex items-center justify-center text-xl font-medium shrink-0">
+        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-accent/10 text-accent flex items-center justify-center text-lg sm:text-xl font-medium shrink-0">
           {persona.name.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
@@ -55,7 +55,7 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
 
       {/* Expanded content */}
       {isExpanded && evaluation && (
-        <div className="px-6 pb-6 flex flex-col gap-5 animate-fade-in">
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6 flex flex-col gap-4 sm:gap-5 animate-fade-in">
           {/* 1. Decision — color-coded by sentiment */}
           {evaluation.decision && (() => {
             const sentiment = evaluation.decisionSentiment ?? 'mixed';
@@ -104,7 +104,7 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
                   <p className={`text-[11px] font-semibold uppercase tracking-wide ${styles.label} mb-1`}>
                     Decision
                   </p>
-                  <p className="text-[14px] leading-relaxed text-text-primary font-medium">
+                  <p className="text-[15px] leading-relaxed text-text-primary font-semibold">
                     {evaluation.decision}
                   </p>
                 </div>
