@@ -78,6 +78,18 @@ export function FileDropZone({ onFileParsed }: FileDropZoneProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-bg-primary">
+      {/* Grid background */}
+      <div
+        className="fixed inset-0 opacity-40 pointer-events-none"
+        style={{
+          backgroundImage:
+            'linear-gradient(#E5E5E5 1px, transparent 1px), linear-gradient(90deg, #E5E5E5 1px, transparent 1px)',
+          backgroundSize: '64px 64px',
+          maskImage: 'radial-gradient(circle at center, black 50%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(circle at center, black 50%, transparent 100%)',
+        }}
+      />
+
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center gap-8 p-10 pb-16 animate-fade-in">
         {/* Brand */}

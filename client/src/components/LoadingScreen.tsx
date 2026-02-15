@@ -92,6 +92,8 @@ export function LoadingScreen({
           backgroundImage:
             'linear-gradient(#E5E5E5 1px, transparent 1px), linear-gradient(90deg, #E5E5E5 1px, transparent 1px)',
           backgroundSize: '64px 64px',
+          maskImage: 'radial-gradient(circle at center, black 50%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(circle at center, black 50%, transparent 100%)',
         }}
       />
 

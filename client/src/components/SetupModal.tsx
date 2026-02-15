@@ -41,6 +41,18 @@ export function SetupModal({
 
   return (
     <div className="min-h-screen flex justify-center relative overflow-y-auto bg-bg-primary">
+      {/* Grid background */}
+      <div
+        className="fixed inset-0 opacity-40 pointer-events-none"
+        style={{
+          backgroundImage:
+            'linear-gradient(#E5E5E5 1px, transparent 1px), linear-gradient(90deg, #E5E5E5 1px, transparent 1px)',
+          backgroundSize: '64px 64px',
+          maskImage: 'radial-gradient(circle at center, black 50%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(circle at center, black 50%, transparent 100%)',
+        }}
+      />
+
       <div className="relative z-10 w-full max-w-[640px] px-6 py-12 pb-16 flex flex-col gap-8 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in-up">
