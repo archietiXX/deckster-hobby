@@ -39,8 +39,10 @@ export function Recommendations({
   onBack,
   onStartOver,
 }: RecommendationsProps) {
-  const getPersonaName = (id: string) =>
-    personas.find((p) => p.id === id)?.name ?? id;
+  const getPersonaLabel = (id: string) => {
+    const p = personas.find((p) => p.id === id);
+    return p ? `${p.name}, ${p.title}` : id;
+  };
 
   return (
     <div className="min-h-screen flex justify-center relative overflow-y-auto bg-bg-primary">
@@ -145,7 +147,7 @@ export function Recommendations({
                         key={id}
                         className="px-2.5 py-0.5 bg-bg-accent-light text-accent-light rounded-full text-xs font-medium"
                       >
-                        {getPersonaName(id)}
+                        {getPersonaLabel(id)}
                       </span>
                     ))}
                   </div>
