@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import type { SlideContent } from '@deckster/shared/types';
 import { parseFile } from '../services/fileParser';
-import './FileDropZone.css';
 
 interface FileDropZoneProps {
   onFileParsed: (contents: SlideContent[], fileName: string) => void;
@@ -77,20 +76,31 @@ export function FileDropZone({ onFileParsed }: FileDropZoneProps) {
   }, [handleFile]);
 
   return (
-    <div className="dropzone-page">
-      {/* Background grid */}
-      <div className="dropzone-grid" />
-
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-bg-primary">
       {/* Content */}
-      <div className="dropzone-content">
-        <div className="dropzone-brand">
-          <span className="dropzone-logo">D</span>
-          <h1 className="dropzone-title">Deckster</h1>
-          <p className="dropzone-subtitle">Evaluator</p>
+      <div className="relative z-10 flex flex-col items-center gap-8 p-10 animate-fade-in">
+        {/* Brand */}
+        <div className="flex flex-col items-center gap-3 animate-fade-in-up">
+          <img src="/logo-black.svg" alt="Deckster" className="h-7" />
+          <p className="font-sans text-[13px] font-medium tracking-[0.2em] uppercase text-text-secondary">
+            Evaluator
+          </p>
         </div>
 
+        {/* Drop area */}
         <div
-          className={`dropzone-area ${isDragging ? 'dropzone-area--active' : ''} ${isParsing ? 'dropzone-area--parsing' : ''}`}
+          className={[
+            'w-[480px] max-w-[90vw] min-h-[260px]',
+            'flex flex-col items-center justify-center gap-4 p-10',
+            'border-[1.5px] border-dashed border-border rounded-2xl',
+            'bg-bg-secondary',
+            'transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+            'animate-fade-in-up [animation-delay:150ms]',
+            'group',
+            !isParsing && 'cursor-pointer hover:border-accent hover:bg-bg-accent-light hover:shadow-[0_0_24px_rgba(0,21,255,0.08)]',
+            isDragging && '!border-accent !bg-bg-accent-light !shadow-[0_0_24px_rgba(0,21,255,0.08)] scale-[1.02]',
+            isParsing && 'cursor-default !border-solid !border-accent !bg-bg-accent-light',
+          ].filter(Boolean).join(' ')}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
           onDragOver={handleDragOver}
@@ -109,34 +119,39 @@ export function FileDropZone({ onFileParsed }: FileDropZoneProps) {
           />
 
           {isParsing ? (
-            <div className="dropzone-parsing">
-              <div className="dropzone-spinner" />
-              <p className="dropzone-parsing-text">
+            <div className="flex flex-col items-center gap-6 animate-fade-in">
+              <div className="w-10 h-10 border-[2.5px] border-border border-t-accent rounded-full animate-spin-slow" />
+              <p className="text-center text-[15px] text-text-secondary leading-relaxed">
                 Extracting slides from<br />
-                <strong>{parsingFileName}</strong>
+                <strong className="text-text-primary font-medium">{parsingFileName}</strong>
               </p>
             </div>
           ) : (
             <>
-              <div className="dropzone-icon">
+              <div className={[
+                'text-text-secondary transition-all duration-300',
+                'group-hover:text-accent group-hover:-translate-y-1',
+                isDragging && '!text-accent !-translate-y-2',
+              ].filter(Boolean).join(' ')}>
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
                   <path d="M24 4L24 32" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
                   <path d="M16 12L24 4L32 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                   <path d="M8 28V38C8 40.2091 9.79086 42 12 42H36C38.2091 42 40 40.2091 40 38V28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
                 </svg>
               </div>
-              <p className="dropzone-cta">
+              <p className="font-sans text-[22px] font-normal text-text-primary">
                 Drop your deck here
               </p>
-              <p className="dropzone-hint">
-                or click to browse — <span className="dropzone-formats">.pptx</span> and <span className="dropzone-formats">.pdf</span> supported
+              <p className="text-sm text-text-secondary">
+                or click to browse — <span className="text-text-accent font-medium">.pptx</span> and <span className="text-text-accent font-medium">.pdf</span> supported
               </p>
             </>
           )}
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="dropzone-error">
+          <div className="flex items-center gap-2 px-4 py-2 bg-red-50 text-error rounded-lg text-sm animate-fade-in">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
               <path d="M8 4.5V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -146,7 +161,8 @@ export function FileDropZone({ onFileParsed }: FileDropZoneProps) {
           </div>
         )}
 
-        <p className="dropzone-tagline">
+        {/* Tagline */}
+        <p className="text-[15px] text-text-secondary/70 text-center max-w-[400px] animate-fade-in-up [animation-delay:300ms]">
           Stress-test your presentation against realistic audience expectations.
         </p>
       </div>

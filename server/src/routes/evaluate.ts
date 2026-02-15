@@ -1,8 +1,72 @@
 import { Router } from 'express';
+import type { Request, Response } from 'express';
+import type { EvaluateRequest, AudienceCategory, SlideContent } from '@deckster/shared/types.js';
+import { generatePersonas } from '../services/personaGenerator.js';
+import { evaluateAsPersona } from '../services/evaluator.js';
+
+// Audience category data — mirrored from client for prompt construction.
+// In a larger app this would live in the shared package, but keeping it
+// server-side avoids bloating the shared types with prompt-engineering details.
+import { audienceCategories } from '../data/audienceCategories.js';
 
 export const evaluateRouter = Router();
 
+function sendSSE(res: Response, event: string, data: unknown) {
+  res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+}
+
+function formatSlideText(slides: SlideContent[]): string {
+  return slides
+    .map((s) => `[Slide ${s.slideNumber}]\n${s.text}`)
+    .join('\n\n');
+}
+
 // POST /api/evaluate — SSE stream of persona generation + evaluations
-evaluateRouter.post('/', (req, res) => {
-  res.status(501).json({ error: 'Not implemented yet' });
+evaluateRouter.post('/', async (req: Request, res: Response) => {
+  const { slideContents, goal, audienceCategoryIds } = req.body as EvaluateRequest;
+
+  // Validate
+  if (!slideContents?.length || !goal?.trim() || !audienceCategoryIds?.length) {
+    res.status(400).json({ error: 'Missing required fields: slideContents, goal, audienceCategoryIds' });
+    return;
+  }
+
+  // Set up SSE
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no', // Disable nginx buffering
+  });
+
+  const selectedCategories: AudienceCategory[] = audienceCategoryIds
+    .map((id: string) => audienceCategories.find((c) => c.id === id))
+    .filter(Boolean) as AudienceCategory[];
+
+  const slideText = formatSlideText(slideContents);
+
+  try {
+    // Phase 1: Generate 5 personas
+    const personas = await generatePersonas(goal, selectedCategories);
+    sendSSE(res, 'personas', personas);
+
+    // Phase 2: Evaluate in parallel, streaming each result as it completes
+    const evaluationPromises = personas.map(async (persona) => {
+      const category = selectedCategories.find((c) => c.id === persona.audienceCategoryId)
+        || selectedCategories[0]; // Fallback to first category
+
+      const evaluation = await evaluateAsPersona(persona, category, goal, slideText);
+      sendSSE(res, 'evaluation', evaluation);
+      return evaluation;
+    });
+
+    await Promise.all(evaluationPromises);
+
+    sendSSE(res, 'done', {});
+    res.end();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Evaluation failed';
+    sendSSE(res, 'error', { message });
+    res.end();
+  }
 });

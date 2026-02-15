@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@deckster/shared": "*",
+    "@tailwindcss/vite": "^4.1.18",
     "jszip": "^3.10.1",
     "pdfjs-dist": "^4.9.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
