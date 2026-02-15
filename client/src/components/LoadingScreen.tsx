@@ -95,7 +95,7 @@ export function LoadingScreen({
         }}
       />
 
-      <div className="relative z-10 flex w-full max-w-[560px] animate-fade-in flex-col gap-8 p-8">
+      <div className="relative z-10 flex w-full max-w-[560px] animate-fade-in flex-col gap-8 p-8 pb-16">
         {/* Phase indicator */}
         <div className="flex flex-col gap-6">
           <div className="flex gap-2">

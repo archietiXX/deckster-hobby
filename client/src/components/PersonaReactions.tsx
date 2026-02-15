@@ -26,6 +26,7 @@ interface PersonaReactionsProps {
   goal: string;
   slideContents: SlideContent[];
   overallSummary: OverallSummary | null;
+  onStartLoadingRecommendations: () => void;
   onShowRecommendations: (result: RecommendationsResponse) => void;
   onStartOver: () => void;
 }
@@ -36,34 +37,30 @@ export function PersonaReactions({
   goal,
   slideContents,
   overallSummary,
+  onStartLoadingRecommendations,
   onShowRecommendations,
   onStartOver,
 }: PersonaReactionsProps) {
   const score = useMemo(() => computeSuccessScore(evaluations), [evaluations]);
   const [expandedId, setExpandedId] = useState<string | null>(personas[0]?.id ?? null);
-  const [isLoadingRecs, setIsLoadingRecs] = useState(false);
-  const [recsError, setRecsError] = useState('');
-  const isRequestingRef = useRef(false);
 
   const handleToggle = useCallback((id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
   }, []);
 
   const handleShowRecommendations = useCallback(async () => {
-    if (isRequestingRef.current) return;
-    isRequestingRef.current = true;
-    setIsLoadingRecs(true);
-    setRecsError('');
+    // Immediately show recommendations screen with loading state
+    onStartLoadingRecommendations();
+
+    // Fetch recommendations in the background
     try {
       const result = await fetchRecommendations(goal, personas, evaluations, slideContents);
       onShowRecommendations(result);
     } catch (err) {
-      setRecsError(err instanceof Error ? err.message : 'Failed to generate recommendations');
-    } finally {
-      setIsLoadingRecs(false);
-      isRequestingRef.current = false;
+      console.error('Failed to generate recommendations:', err);
+      // TODO: Show error state in Recommendations screen
     }
-  }, [goal, personas, evaluations, onShowRecommendations]);
+  }, [goal, personas, evaluations, slideContents, onStartLoadingRecommendations, onShowRecommendations]);
 
   return (
     <div className="min-h-screen flex justify-center relative overflow-y-auto bg-bg-primary">
@@ -77,7 +74,7 @@ export function PersonaReactions({
         }}
       />
 
-      <div className="relative z-[1] w-full max-w-2xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-6 sm:gap-8 animate-fade-in">
+      <div className="relative z-[1] w-full max-w-2xl px-4 sm:px-6 py-8 sm:py-12 pb-16 flex flex-col gap-6 sm:gap-8 animate-fade-in">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 sm:gap-6 animate-fade-in-up">
           <div>
@@ -156,9 +153,9 @@ export function PersonaReactions({
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600 mb-1.5">
                   What works well
                 </p>
-                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
                   {overallSummary.strengths.map((s, i) => (
-                    <span key={i} className="relative pl-3 text-[13px] leading-snug text-text-primary before:content-[''] before:absolute before:left-0 before:top-[6px] before:w-[5px] before:h-[5px] before:rounded-full before:bg-emerald-500">
+                    <span key={i} className="relative pl-3 text-[13px] leading-relaxed text-text-primary before:content-[''] before:absolute before:left-0 before:top-[7px] before:w-[5px] before:h-[5px] before:rounded-full before:bg-emerald-500">
                       {s}
                     </span>
                   ))}
@@ -168,9 +165,9 @@ export function PersonaReactions({
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-red-500 mb-1.5">
                   What needs work
                 </p>
-                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
                   {overallSummary.weaknesses.map((w, i) => (
-                    <span key={i} className="relative pl-3 text-[13px] leading-snug text-text-primary before:content-[''] before:absolute before:left-0 before:top-[6px] before:w-[5px] before:h-[5px] before:rounded-full before:bg-red-400">
+                    <span key={i} className="relative pl-3 text-[13px] leading-relaxed text-text-primary before:content-[''] before:absolute before:left-0 before:top-[7px] before:w-[5px] before:h-[5px] before:rounded-full before:bg-red-400">
                       {w}
                     </span>
                   ))}
@@ -189,30 +186,17 @@ export function PersonaReactions({
               </p>
             </div>
             <button
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-accent border-none rounded-lg text-white font-sans text-[13px] font-semibold cursor-pointer transition-all duration-200 whitespace-nowrap shrink-0 w-full sm:w-auto justify-center hover:enabled:bg-accent-hover disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_1px_3px_rgba(0,21,255,0.2)]"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 border-none rounded-lg text-white font-sans text-[13px] font-semibold cursor-pointer transition-all duration-200 whitespace-nowrap shrink-0 w-full sm:w-auto justify-center shadow-[0_1px_3px_rgba(0,21,255,0.2)] bg-gradient-to-r from-accent via-accent-light to-accent bg-[length:200%_100%] animate-shimmer hover:shadow-[0_2px_8px_rgba(0,21,255,0.3)]"
               onClick={handleShowRecommendations}
-              disabled={isLoadingRecs}
               type="button"
             >
-              {isLoadingRecs ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-[1.5px] border-white/20 border-t-white rounded-full animate-spin-slow" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  See recommendations
-                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-                    <path d="M4 10H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    <path d="M11 5L16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </>
-              )}
+              See recommendations
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <path d="M4 10H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M11 5L16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </button>
           </div>
-          {recsError && (
-            <p className="text-[13px] text-error">{recsError}</p>
-          )}
         </div>
 
         {/* Detailed breakdown */}

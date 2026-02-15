@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <div className="fixed bottom-0 left-0 right-0 py-3 text-center text-xs text-text-secondary/60 bg-bg-primary/80 backdrop-blur-sm border-t border-border/30">
+    <div className="fixed bottom-0 left-0 right-0 py-3 text-center text-xs text-text-secondary/60 bg-bg-primary border-t border-border/30 z-10">
       Powered by{' '}
       <a
         href="https://deckster.pro/"

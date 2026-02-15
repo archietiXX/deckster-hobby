@@ -103,7 +103,7 @@ export function Recommendations({
         }}
       />
 
-      <div className="relative z-[1] w-full max-w-2xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col gap-6 sm:gap-8 animate-fade-in">
+      <div className="relative z-[1] w-full max-w-2xl px-4 sm:px-6 py-8 sm:py-12 pb-16 flex flex-col gap-6 sm:gap-8 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in-up">
           <button
@@ -119,7 +119,7 @@ export function Recommendations({
           </button>
           <div className="flex items-center gap-2">
             <button
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-transparent border border-border rounded-lg text-text-secondary font-sans text-[13px] cursor-pointer transition-all duration-200 hover:border-gray-400 hover:text-text-primary hover:bg-bg-primary"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 border-none rounded-lg text-white font-sans text-[13px] font-semibold cursor-pointer transition-all duration-200 shadow-[0_1px_3px_rgba(0,21,255,0.2)] bg-gradient-to-r from-accent via-accent-light to-accent bg-[length:200%_100%] animate-shimmer hover:shadow-[0_2px_8px_rgba(0,21,255,0.3)]"
               onClick={handleSaveReport}
               type="button"
             >

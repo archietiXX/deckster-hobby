@@ -41,7 +41,7 @@ export function SetupModal({
 
   return (
     <div className="min-h-screen flex justify-center relative overflow-y-auto bg-bg-primary">
-      <div className="relative z-10 w-full max-w-[640px] px-6 py-12 flex flex-col gap-8 animate-fade-in">
+      <div className="relative z-10 w-full max-w-[640px] px-6 py-12 pb-16 flex flex-col gap-8 animate-fade-in">
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in-up">
           <button

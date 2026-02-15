@@ -26,6 +26,7 @@ export default function App() {
   const [mainAdvice, setMainAdvice] = useState('');
   const [overallSummary, setOverallSummary] = useState<OverallSummary | null>(null);
   const [fileName, setFileName] = useState('');
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
 
   const handleFileParsed = useCallback((contents: SlideContent[], name: string) => {
     setSlideContents(contents);
@@ -53,10 +54,15 @@ export default function App() {
     setScreen('results');
   }, []);
 
+  const handleStartLoadingRecommendations = useCallback(() => {
+    setIsLoadingRecommendations(true);
+    setScreen('recommendations');
+  }, []);
+
   const handleShowRecommendations = useCallback((result: RecommendationsResponse) => {
     setMainAdvice(result.mainAdvice);
     setRecommendations(result.recommendations);
-    setScreen('recommendations');
+    setIsLoadingRecommendations(false);
   }, []);
 
   const handleBackToResults = useCallback(() => {
@@ -117,6 +123,7 @@ export default function App() {
           goal={goal}
           slideContents={slideContents}
           overallSummary={overallSummary}
+          onStartLoadingRecommendations={handleStartLoadingRecommendations}
           onShowRecommendations={handleShowRecommendations}
           onStartOver={handleStartOver}
         />
@@ -130,6 +137,7 @@ export default function App() {
           evaluations={evaluations}
           overallSummary={overallSummary}
           goal={goal}
+          isLoading={isLoadingRecommendations}
           onBack={handleBackToResults}
           onStartOver={handleStartOver}
         />

@@ -79,7 +79,7 @@ export function FileDropZone({ onFileParsed }: FileDropZoneProps) {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-bg-primary">
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center gap-8 p-10 animate-fade-in">
+      <div className="relative z-10 flex flex-col items-center gap-8 p-10 pb-16 animate-fade-in">
         {/* Brand */}
         <div className="flex flex-col items-center gap-3 animate-fade-in-up">
           <img src="/logo-black.svg" alt="Deckster" className="h-7" />
