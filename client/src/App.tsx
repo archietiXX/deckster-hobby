@@ -5,6 +5,7 @@ import type {
   Persona,
   PersonaEvaluation,
   Recommendation,
+  StructureAdvice,
   RecommendationsResponse,
   OverallSummary,
 } from '@deckster/shared/types';
@@ -24,6 +25,7 @@ export default function App() {
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [evaluations, setEvaluations] = useState<PersonaEvaluation[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [structureAdvice, setStructureAdvice] = useState<StructureAdvice[]>([]);
   const [mainAdvice, setMainAdvice] = useState('');
   const [overallSummary, setOverallSummary] = useState<OverallSummary | null>(null);
   const [fileName, setFileName] = useState('');
@@ -47,6 +49,7 @@ export default function App() {
     setPersonas(saved.personas);
     setEvaluations(saved.evaluations);
     setRecommendations(saved.recommendations);
+    setStructureAdvice(saved.structureAdvice ?? []);
     setMainAdvice(saved.mainAdvice);
     setOverallSummary(saved.overallSummary);
     setFileName(saved.fileName);
@@ -63,11 +66,12 @@ export default function App() {
       personas,
       evaluations,
       recommendations,
+      structureAdvice,
       mainAdvice,
       overallSummary,
       fileName,
     });
-  }, [screen, slideContents, goal, selectedAudiences, audienceContext, personas, evaluations, recommendations, mainAdvice, overallSummary, fileName]);
+  }, [screen, slideContents, goal, selectedAudiences, audienceContext, personas, evaluations, recommendations, structureAdvice, mainAdvice, overallSummary, fileName]);
 
   const handleFileParsed = useCallback((contents: SlideContent[], name: string) => {
     setSlideContents(contents);
@@ -106,6 +110,7 @@ export default function App() {
 
   const handleShowRecommendations = useCallback((result: RecommendationsResponse) => {
     setMainAdvice(result.mainAdvice);
+    setStructureAdvice(result.structureAdvice ?? []);
     setRecommendations(result.recommendations);
     setIsLoadingRecommendations(false);
   }, []);
@@ -124,6 +129,7 @@ export default function App() {
     setPersonas([]);
     setEvaluations([]);
     setRecommendations([]);
+    setStructureAdvice([]);
     setMainAdvice('');
     setOverallSummary(null);
     setFileName('');
@@ -180,11 +186,13 @@ export default function App() {
       {screen === 'recommendations' && (
         <Recommendations
           mainAdvice={mainAdvice}
+          structureAdvice={structureAdvice}
           recommendations={recommendations}
           personas={personas}
           evaluations={evaluations}
           overallSummary={overallSummary}
           goal={goal}
+          slideContents={slideContents}
           isLoading={isLoadingRecommendations}
           onBack={handleBackToResults}
           onStartOver={handleStartOver}

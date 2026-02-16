@@ -29,6 +29,7 @@ const colors = {
   accent: [0, 21, 255] as const,
   green: [22, 163, 74] as const,
   red: [220, 38, 38] as const,
+  orange: [234, 88, 12] as const,
   amber: [217, 119, 6] as const,
   greenBg: [240, 253, 244] as const,
   redBg: [254, 242, 242] as const,
@@ -116,14 +117,16 @@ function scoreColor(score: number): RGB {
   return colors.red;
 }
 
-function priorityColor(priority: 'top' | 'important' | 'consider'): RGB {
+function priorityColor(priority: 'top' | 'critical' | 'important' | 'consider'): RGB {
   if (priority === 'top') return colors.red;
+  if (priority === 'critical') return colors.orange;
   if (priority === 'important') return colors.amber;
   return colors.gray;
 }
 
-function priorityLabel(priority: 'top' | 'important' | 'consider'): string {
+function priorityLabel(priority: 'top' | 'critical' | 'important' | 'consider'): string {
   if (priority === 'top') return 'TOP PRIORITY';
+  if (priority === 'critical') return 'CRITICAL';
   if (priority === 'important') return 'IMPORTANT';
   return 'CONSIDER';
 }

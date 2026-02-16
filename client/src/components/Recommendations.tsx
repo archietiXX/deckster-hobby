@@ -1,64 +1,270 @@
-import type { Recommendation, Persona, PersonaEvaluation, OverallSummary } from '@deckster/shared/types';
+import { useEffect, useMemo, useState } from 'react';
+import type { Recommendation, StructureAdvice, Persona, PersonaEvaluation, OverallSummary, SlideContent } from '@deckster/shared/types';
 import { generateReport } from '../services/pdfExport';
 import { Footer } from './Footer';
 
 interface RecommendationsProps {
   mainAdvice: string;
+  structureAdvice: StructureAdvice[];
   recommendations: Recommendation[];
   personas: Persona[];
   evaluations: PersonaEvaluation[];
   overallSummary: OverallSummary | null;
   goal: string;
+  slideContents: SlideContent[];
   isLoading?: boolean;
   onBack: () => void;
   onStartOver: () => void;
 }
 
+const actionConfig = {
+  add: { label: 'Add', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: '+' },
+  delete: { label: 'Remove', badge: 'bg-red-50 text-red-700 border-red-200', icon: '\u2212' },
+  reorder: { label: 'Reorder', badge: 'bg-violet-50 text-violet-700 border-violet-200', icon: '\u2195' },
+};
+
+type Priority = 'top' | 'critical' | 'important' | 'consider';
+const priorityOrder: Priority[] = ['top', 'critical', 'important', 'consider'];
+
 const priorityConfig = {
   top: {
     label: 'Top Priority',
     badge: 'bg-red-50 text-red-700 border-red-200',
-    accent: 'bg-red-600',
-    border: 'border-red-200 hover:border-red-300',
-    ring: 'shadow-[0_2px_12px_rgba(220,38,38,0.08)]',
+    dot: 'bg-red-500',
+  },
+  critical: {
+    label: 'Critical',
+    badge: 'bg-orange-50 text-orange-700 border-orange-200',
+    dot: 'bg-orange-500',
   },
   important: {
     label: 'Important',
     badge: 'bg-amber-50 text-amber-700 border-amber-200',
-    accent: 'bg-amber-500',
-    border: 'border-amber-200 hover:border-amber-300',
-    ring: '',
+    dot: 'bg-amber-500',
   },
   consider: {
     label: 'Consider',
     badge: 'bg-slate-50 text-slate-600 border-slate-200',
-    accent: 'bg-slate-400',
-    border: 'border-border hover:border-gray-300',
-    ring: '',
+    dot: 'bg-slate-400',
   },
 };
+
+interface SlideGroup {
+  slideNumber: number | null; // null = General
+  title: string;
+  recommendations: Recommendation[];
+}
+
+function getSlideTitle(text: string): string {
+  const firstLine = text.split('\n')[0]?.trim() ?? '';
+  return firstLine.length > 60 ? firstLine.slice(0, 57) + '...' : firstLine;
+}
+
+function groupBySlide(recommendations: Recommendation[], slideContents: SlideContent[]): SlideGroup[] {
+  const slideMap = new Map<number, Recommendation[]>();
+  const general: Recommendation[] = [];
+
+  for (const rec of recommendations) {
+    const slides = rec.slideNumbers ?? [];
+    if (slides.length === 0) {
+      general.push(rec);
+    } else {
+      const primary = slides[0];
+      if (!slideMap.has(primary)) slideMap.set(primary, []);
+      slideMap.get(primary)!.push(rec);
+    }
+  }
+
+  const titleLookup = new Map(slideContents.map((s) => [s.slideNumber, getSlideTitle(s.text)]));
+
+  const groups: SlideGroup[] = [...slideMap.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([num, recs]) => ({
+      slideNumber: num,
+      title: titleLookup.get(num) ?? `Slide ${num}`,
+      recommendations: recs,
+    }));
+
+  if (general.length > 0) {
+    groups.unshift({ slideNumber: null, title: 'General', recommendations: general });
+  }
+
+  return groups;
+}
 
 function SkeletonCard({ index }: { index: number }) {
   return (
     <div
-      className="flex gap-4 sm:gap-5 p-4 sm:p-6 bg-bg-primary border border-border rounded-xl animate-pulse"
+      className="flex gap-3 py-3 animate-pulse"
       style={{ animationDelay: `${index * 0.1}s` }}
     >
-      <div className="w-9 h-9 rounded-full bg-border shrink-0" />
-      <div className="flex-1 flex flex-col gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="h-4 w-40 bg-border rounded" />
-          <div className="h-4 w-16 bg-border rounded-full" />
+      <div className="w-1.5 h-1.5 rounded-full bg-border shrink-0 mt-2" />
+      <div className="flex-1 flex flex-col gap-1.5">
+        <div className="h-3.5 w-48 bg-border rounded" />
+        <div className="h-3 w-full bg-border/70 rounded" />
+        <div className="h-3 w-3/4 bg-border/70 rounded" />
+      </div>
+    </div>
+  );
+}
+
+function AddressesConcerns({
+  personaIds,
+  getPersonaLabel,
+}: {
+  personaIds: string[];
+  getPersonaLabel: (id: string) => string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  if (personaIds.length === 0) return null;
+
+  return (
+    <div className="flex flex-col gap-1">
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-1.5 text-[11px] sm:text-[12px] text-text-secondary/60 hover:text-text-secondary transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 text-left"
+      >
+        <span>
+          Addresses concerns of {personaIds.length} {personaIds.length === 1 ? 'person' : 'people'}
+        </span>
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+          className={`transition-transform duration-150 ${expanded ? 'rotate-90' : ''}`}
+        >
+          <path d="M4.5 3L7.5 6L4.5 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {expanded && (
+        <div className="flex flex-wrap gap-1.5 pl-0.5 animate-fade-in">
+          {personaIds.map((id) => (
+            <span
+              key={id}
+              className="px-2 py-0.5 bg-bg-accent-light text-accent-light rounded-full text-[10px] sm:text-[11px] font-medium"
+            >
+              {getPersonaLabel(id)}
+            </span>
+          ))}
         </div>
-        <div className="flex flex-col gap-1.5">
-          <div className="h-3 w-full bg-border/70 rounded" />
-          <div className="h-3 w-5/6 bg-border/70 rounded" />
-          <div className="h-3 w-3/4 bg-border/70 rounded" />
+      )}
+    </div>
+  );
+}
+
+function StructureItem({
+  advice: sa,
+  getPersonaLabel,
+}: {
+  advice: StructureAdvice;
+  getPersonaLabel: (id: string) => string;
+}) {
+  const ac = actionConfig[sa.action] ?? actionConfig.add;
+  const [whyExpanded, setWhyExpanded] = useState(false);
+
+  return (
+    <div className="flex gap-3 items-start">
+      <span className={`px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide rounded border shrink-0 mt-[2px] ${ac.badge}`}>
+        {ac.icon} {ac.label}
+      </span>
+      <div className="flex flex-col gap-1 min-w-0">
+        <p className="text-[13px] leading-[1.6] text-text-primary">{sa.description}</p>
+        <div className="flex flex-wrap items-center gap-3">
+          {sa.rationale && (
+            <button
+              type="button"
+              onClick={() => setWhyExpanded(!whyExpanded)}
+              className="flex items-center gap-1.5 text-[11px] sm:text-[12px] text-text-secondary/60 hover:text-text-secondary transition-colors duration-150 cursor-pointer bg-transparent border-none p-0"
+            >
+              <span>Why?</span>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                className={`transition-transform duration-150 ${whyExpanded ? 'rotate-90' : ''}`}
+              >
+                <path d="M4.5 3L7.5 6L4.5 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          )}
+          <AddressesConcerns personaIds={sa.relatedPersonaIds} getPersonaLabel={getPersonaLabel} />
         </div>
-        <div className="flex gap-1.5">
-          <div className="h-5 w-28 bg-border/50 rounded-full" />
-          <div className="h-5 w-24 bg-border/50 rounded-full" />
+        {whyExpanded && sa.rationale && (
+          <p className="text-[12px] sm:text-[13px] leading-[1.7] text-text-secondary/80 italic pl-0.5 animate-fade-in">
+            {sa.rationale}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RecBullet({
+  rec,
+  index,
+  getPersonaLabel,
+}: {
+  rec: Recommendation;
+  index: number;
+  getPersonaLabel: (id: string) => string;
+}) {
+  const config = priorityConfig[rec.priority] ?? priorityConfig.consider;
+  const extraSlides = (rec.slideNumbers ?? []).slice(1);
+  const [whyExpanded, setWhyExpanded] = useState(false);
+
+  return (
+    <div
+      className="flex gap-3 py-2 animate-fade-in-up"
+      style={{ animationDelay: `${index * 0.06}s` }}
+    >
+      <div className={`w-1.5 h-1.5 rounded-full ${config.dot} shrink-0 mt-[7px]`} />
+      <div className="flex-1 flex flex-col gap-1.5 min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[13px] sm:text-[14px] font-semibold text-text-primary leading-snug">
+            {rec.title}
+          </span>
+          <span className={`px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide rounded-full border ${config.badge}`}>
+            {config.label}
+          </span>
+          {extraSlides.map((sn) => (
+            <span
+              key={sn}
+              className="px-1.5 py-0.5 text-[9px] font-medium rounded-full border border-slate-200 bg-slate-50 text-slate-500"
+            >
+              +Slide {sn}
+            </span>
+          ))}
         </div>
+        <p className="text-[13px] leading-[1.6] text-text-secondary">{rec.text}</p>
+        <div className="flex flex-wrap items-center gap-3">
+          {rec.priorityRationale && (
+            <button
+              type="button"
+              onClick={() => setWhyExpanded(!whyExpanded)}
+              className="flex items-center gap-1.5 text-[11px] sm:text-[12px] text-text-secondary/60 hover:text-text-secondary transition-colors duration-150 cursor-pointer bg-transparent border-none p-0"
+            >
+              <span>Why?</span>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                className={`transition-transform duration-150 ${whyExpanded ? 'rotate-90' : ''}`}
+              >
+                <path d="M4.5 3L7.5 6L4.5 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          )}
+          <AddressesConcerns personaIds={rec.relatedPersonaIds} getPersonaLabel={getPersonaLabel} />
+        </div>
+        {whyExpanded && rec.priorityRationale && (
+          <p className="text-[12px] sm:text-[13px] leading-[1.7] text-text-secondary/80 italic pl-0.5 animate-fade-in">
+            {rec.priorityRationale}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -66,11 +272,13 @@ function SkeletonCard({ index }: { index: number }) {
 
 export function Recommendations({
   mainAdvice,
+  structureAdvice,
   recommendations,
   personas,
   evaluations,
   overallSummary,
   goal,
+  slideContents,
   isLoading,
   onBack,
   onStartOver,
@@ -79,6 +287,67 @@ export function Recommendations({
     const p = personas.find((p) => p.id === id);
     return p ? `${p.name}, ${p.title}` : id;
   };
+
+  // Countdown timer for recommendation generation (80 seconds = 1:20)
+  const [loadingElapsed, setLoadingElapsed] = useState(0);
+  useEffect(() => {
+    if (!isLoading) { setLoadingElapsed(0); return; }
+    const interval = setInterval(() => setLoadingElapsed((prev) => prev + 1), 1000);
+    return () => clearInterval(interval);
+  }, [isLoading]);
+  const loadingRemaining = Math.max(0, 80 - loadingElapsed);
+  const loadingOverTime = loadingRemaining === 0;
+  const formatCountdown = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Slides marked for deletion — don't show per-slide recommendations for these
+  const deletedSlides = useMemo(() => {
+    const deleted = new Set<number>();
+    for (const sa of structureAdvice) {
+      if (sa.action === 'delete') {
+        // Extract slide numbers mentioned in the description (e.g., "slide 6")
+        const matches = sa.description.matchAll(/slide\s+(\d+)/gi);
+        for (const m of matches) deleted.add(Number(m[1]));
+      }
+    }
+    return deleted;
+  }, [structureAdvice]);
+
+  // Priority filter — null means "show all"
+  const [activePriority, setActivePriority] = useState<Priority | null>(null);
+
+  // Which priorities actually exist in the data (for rendering only relevant chips)
+  const availablePriorities = useMemo(
+    () => priorityOrder.filter((p) => recommendations.some((r) => r.priority === p)),
+    [recommendations],
+  );
+
+  const filteredRecommendations = useMemo(() => {
+    let recs = recommendations;
+
+    // Filter out deleted slides
+    if (deletedSlides.size > 0) {
+      recs = recs.filter((rec) => {
+        const slides = rec.slideNumbers ?? [];
+        return slides.length === 0 || !deletedSlides.has(slides[0]);
+      });
+    }
+
+    // Filter by priority
+    if (activePriority) {
+      recs = recs.filter((rec) => rec.priority === activePriority);
+    }
+
+    return recs;
+  }, [recommendations, deletedSlides, activePriority]);
+
+  const groups = useMemo(
+    () => groupBySlide(filteredRecommendations, slideContents),
+    [filteredRecommendations, slideContents],
+  );
 
   const handleSaveReport = () => {
     window.posthog?.capture('Evaluator_report');
@@ -91,6 +360,8 @@ export function Recommendations({
       recommendations,
     });
   };
+
+  let bulletIndex = 0;
 
   return (
     <div className="min-h-screen flex justify-center relative overflow-y-auto bg-bg-primary">
@@ -168,22 +439,32 @@ export function Recommendations({
 
         {/* Skeleton state */}
         {isLoading && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2 px-2">
+            <div className="flex items-center gap-2 pb-2">
+              <span className="text-[12px] text-text-secondary/60 tabular-nums">
+                {formatCountdown(loadingRemaining)}
+              </span>
+              {loadingOverTime && (
+                <span className="text-[12px] text-text-secondary/60 animate-fade-in">
+                  — Taking a bit longer than usual, hang tight
+                </span>
+              )}
+            </div>
             {[0, 1, 2, 3, 4].map((i) => (
               <SkeletonCard key={i} index={i} />
             ))}
           </div>
         )}
 
-        {/* Main advice */}
+        {/* Strategic advice */}
         {!isLoading && mainAdvice && (
-          <div className="p-4 sm:p-5 bg-accent/[0.03] border border-accent/15 rounded-xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <div className="p-4 sm:p-5 bg-accent/[0.03] border border-accent/15 rounded-xl animate-fade-in-up mt-4 sm:mt-6" style={{ animationDelay: '0.1s' }}>
             <div className="flex items-center gap-2 mb-2.5">
               <svg className="w-5 h-5 text-accent shrink-0" viewBox="0 0 20 20" fill="none">
                 <path d="M10 2L12.09 7.26L18 8.27L14 12.14L14.81 18.02L10 15.27L5.19 18.02L6 12.14L2 8.27L7.91 7.26L10 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <h2 className="text-[13px] font-semibold uppercase tracking-wide text-accent">
-                Main Advice
+                Strategic Advice
               </h2>
             </div>
             <p className="text-[14px] sm:text-[15px] leading-[1.7] text-text-primary">
@@ -192,59 +473,111 @@ export function Recommendations({
           </div>
         )}
 
-        {/* Practical recommendations */}
+        {/* Section 1: Deck Structure */}
+        {!isLoading && structureAdvice.length > 0 && (
+          <div className="flex flex-col gap-3 animate-fade-in-up mt-4 sm:mt-6" style={{ animationDelay: '0.15s' }}>
+            <h2 className="text-[15px] sm:text-[17px] font-semibold text-text-primary">
+              Deck Structure
+            </h2>
+            <div className="flex flex-col gap-2">
+              {structureAdvice.map((sa, i) => (
+                <StructureItem key={i} advice={sa} getPersonaLabel={getPersonaLabel} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Section 2: Slide Improvements */}
         {!isLoading && recommendations.length > 0 && (
-          <>
-            <div className="flex flex-col gap-1.5">
-              <h2 className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
-                Practical Steps
+          <div className="flex flex-col gap-5 animate-fade-in-up mt-4 sm:mt-6" style={{ animationDelay: '0.2s' }}>
+            {/* Section header with inline filter */}
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-[15px] sm:text-[17px] font-semibold text-text-primary mr-2">
+                Slide Improvements
               </h2>
+              {availablePriorities.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setActivePriority(null)}
+                    className={`px-2.5 py-1 text-[11px] font-medium rounded-full border transition-all duration-150 cursor-pointer ${
+                      activePriority === null
+                        ? 'bg-text-primary text-bg-primary border-text-primary'
+                        : 'bg-transparent text-text-secondary border-border hover:border-gray-400'
+                    }`}
+                  >
+                    All
+                  </button>
+                  {availablePriorities.map((p) => {
+                    const cfg = priorityConfig[p];
+                    const isActive = activePriority === p;
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setActivePriority(isActive ? null : p)}
+                        className={`px-2.5 py-1 text-[11px] font-medium rounded-full border transition-all duration-150 cursor-pointer ${
+                          isActive
+                            ? cfg.badge
+                            : 'bg-transparent text-text-secondary border-border hover:border-gray-400'
+                        }`}
+                      >
+                        {cfg.label}
+                      </button>
+                    );
+                  })}
+                </>
+              )}
             </div>
 
-            <div className="flex flex-col gap-4 -mt-4">
-              {recommendations.map((rec, i) => {
-                const config = priorityConfig[rec.priority] ?? priorityConfig.consider;
-                return (
-                  <div
-                    key={rec.number}
-                    className={`flex gap-4 sm:gap-5 p-4 sm:p-6 bg-bg-primary border rounded-xl animate-fade-in-up transition-[border-color,box-shadow] duration-200 ${config.border} ${config.ring}`}
-                    style={{ animationDelay: `${i * 0.08}s` }}
-                  >
-                    <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full ${config.accent} text-white flex items-center justify-center font-sans text-base sm:text-lg font-semibold shrink-0`}>
-                      {rec.number}
-                    </div>
-                    <div className="flex-1 flex flex-col gap-3 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                        <h3 className="text-[14px] sm:text-[15px] font-semibold text-text-primary leading-snug">
-                          {rec.title}
-                        </h3>
-                        <span className={`px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-full border ${config.badge}`}>
-                          {config.label}
-                        </span>
-                      </div>
-                      <p className="text-[13px] sm:text-[14px] leading-[1.7] text-text-secondary">{rec.text}</p>
-                      {rec.priorityRationale && (
-                        <p className="text-[12px] sm:text-[13px] leading-relaxed text-text-secondary/70 italic">
-                          <span className="font-semibold not-italic text-text-secondary">Why?</span>{' '}
-                          {rec.priorityRationale}
-                        </p>
-                      )}
-                      <div className="flex flex-wrap gap-1.5">
-                        {rec.relatedPersonaIds.map((id) => (
-                          <span
-                            key={id}
-                            className="px-2 sm:px-2.5 py-0.5 bg-bg-accent-light text-accent-light rounded-full text-[11px] sm:text-xs font-medium"
-                          >
-                            {getPersonaLabel(id)}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+            {/* Slide groups */}
+            {groups.length === 0 && activePriority && (
+              <p className="text-[13px] text-text-secondary/60 italic">
+                No {priorityConfig[activePriority].label.toLowerCase()} recommendations.
+              </p>
+            )}
+            <div className="flex flex-col gap-6">
+            {groups.map((group) => (
+              <div
+                key={group.slideNumber ?? 'general'}
+                className="flex flex-col gap-1 animate-fade-in-up"
+              >
+                {/* Group heading */}
+                <div className="flex items-center gap-2.5 pb-1.5 border-b border-border">
+                  {group.slideNumber != null ? (
+                    <>
+                      <span className="text-[12px] sm:text-[13px] font-semibold text-text-secondary whitespace-nowrap">
+                        Slide {group.slideNumber}
+                      </span>
+                      <span className="text-[12px] sm:text-[13px] text-text-secondary/60 truncate">
+                        {group.title}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-[12px] sm:text-[13px] font-semibold text-text-secondary">
+                      General
+                    </span>
+                  )}
+                </div>
+
+                {/* Bullet items */}
+                <div className="flex flex-col pl-1">
+                  {group.recommendations.map((rec) => {
+                    const idx = bulletIndex++;
+                    return (
+                      <RecBullet
+                        key={rec.number}
+                        rec={rec}
+                        index={idx}
+                        getPersonaLabel={getPersonaLabel}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
             </div>
-          </>
+          </div>
         )}
       </div>
       <Footer />

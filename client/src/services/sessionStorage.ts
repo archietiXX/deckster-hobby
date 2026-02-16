@@ -4,6 +4,7 @@ import type {
   Persona,
   PersonaEvaluation,
   Recommendation,
+  StructureAdvice,
   OverallSummary,
 } from '@deckster/shared/types';
 
@@ -18,6 +19,7 @@ export interface SessionState {
   personas: Persona[];
   evaluations: PersonaEvaluation[];
   recommendations: Recommendation[];
+  structureAdvice: StructureAdvice[];
   mainAdvice: string;
   overallSummary: OverallSummary | null;
   fileName: string;

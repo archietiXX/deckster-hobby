@@ -31,6 +31,8 @@ export function LoadingScreen({
   const [error, setError] = useState('');
   const startedRef = useRef(false);
   const [elapsed, setElapsed] = useState(0);
+  const remaining = Math.max(0, 80 - elapsed);
+  const overTime = remaining === 0;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -138,9 +140,14 @@ export function LoadingScreen({
                 <p className="mt-1 text-sm text-text-secondary">
                   Generating realistic personas based on your audience selection...
                   <span className="text-[12px] text-text-secondary/60 ml-2">
-                    {formatTime(elapsed)}
+                    {formatTime(remaining)}
                   </span>
                 </p>
+                {overTime && (
+                  <p className="mt-1 text-[12px] text-text-secondary/60 animate-fade-in">
+                    Taking a bit longer than usual — hang tight
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -155,12 +162,14 @@ export function LoadingScreen({
                 <p className="mt-1 text-sm text-text-secondary">
                   {completedIds.size} of {personas.length} evaluations complete
                   <span className="text-[12px] text-text-secondary/60 ml-2">
-                    {formatTime(elapsed)}
+                    {formatTime(remaining)}
                   </span>
                 </p>
-                <p className="mt-1 text-[12px] text-text-secondary/60">
-                  Usually takes 20–40 seconds
-                </p>
+                {overTime && (
+                  <p className="mt-1 text-[12px] text-text-secondary/60 animate-fade-in">
+                    Taking a bit longer than usual — hang tight
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -175,9 +184,14 @@ export function LoadingScreen({
                 <p className="mt-1 text-sm text-text-secondary">
                   Combining all panel feedback into a verdict...
                   <span className="text-[12px] text-text-secondary/60 ml-2">
-                    {formatTime(elapsed)}
+                    {formatTime(remaining)}
                   </span>
                 </p>
+                {overTime && (
+                  <p className="mt-1 text-[12px] text-text-secondary/60 animate-fade-in">
+                    Taking a bit longer than usual — hang tight
+                  </p>
+                )}
               </div>
             </div>
           )}

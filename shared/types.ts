@@ -34,9 +34,10 @@ export interface Recommendation {
   number: number;
   title: string;
   text: string;
-  priority: 'top' | 'important' | 'consider';
+  priority: 'top' | 'critical' | 'important' | 'consider';
   priorityRationale: string;
   relatedPersonaIds: string[];
+  slideNumbers: number[];  // Which slides this applies to ([] = deck-wide)
 }
 
 // ── Overall Summary ──
@@ -77,8 +78,16 @@ export interface RecommendationsRequest {
   slideContents: SlideContent[];
 }
 
+export interface StructureAdvice {
+  action: 'add' | 'delete' | 'reorder';
+  description: string;
+  rationale: string;
+  relatedPersonaIds: string[];
+}
+
 export interface RecommendationsResponse {
   mainAdvice: string;
+  structureAdvice: StructureAdvice[];
   recommendations: Recommendation[];
 }
 
