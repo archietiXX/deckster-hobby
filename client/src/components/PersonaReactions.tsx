@@ -158,7 +158,7 @@ export function PersonaReactions({
           {overallSummary && (
             <div className="flex flex-col gap-6">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600 mb-1.5">
+                <p className="text-sm font-bold uppercase tracking-wide text-emerald-600 mb-1.5">
                   What works well
                 </p>
                 <div className="flex flex-wrap gap-x-4 gap-y-2">
@@ -170,7 +170,7 @@ export function PersonaReactions({
                 </div>
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-red-500 mb-1.5">
+                <p className="text-sm font-bold uppercase tracking-wide text-red-500 mb-1.5">
                   What needs work
                 </p>
                 <div className="flex flex-wrap gap-x-4 gap-y-2">

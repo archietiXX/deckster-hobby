@@ -121,8 +121,13 @@ export function Recommendations({
           </button>
           <div className="flex items-center gap-2">
             <button
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 border-none rounded-lg text-white font-sans text-[13px] font-semibold cursor-pointer transition-all duration-200 shadow-[0_1px_3px_rgba(0,21,255,0.2)] bg-gradient-to-r from-accent via-accent-light to-accent bg-[length:200%_100%] animate-shimmer hover:shadow-[0_2px_8px_rgba(0,21,255,0.3)]"
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 border-none rounded-lg text-white font-sans text-[13px] font-semibold transition-all duration-200 ${
+                isLoading
+                  ? 'opacity-35 cursor-not-allowed'
+                  : 'cursor-pointer shadow-[0_1px_3px_rgba(0,21,255,0.2)] bg-gradient-to-r from-accent via-accent-light to-accent bg-[length:200%_100%] animate-shimmer hover:shadow-[0_2px_8px_rgba(0,21,255,0.3)]'
+              }`}
               onClick={handleSaveReport}
+              disabled={isLoading}
               type="button"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -145,12 +150,19 @@ export function Recommendations({
 
         {/* Title */}
         <div className="animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
-          <h1 className="font-sans text-[24px] sm:text-[32px] font-normal tracking-tight text-text-primary">
-            Recommendations
-          </h1>
-          <p className="text-[14px] sm:text-[15px] text-text-secondary mt-1">
-            Improvements ranked by impact on your presentation goal.
-          </p>
+          <div className="flex items-center gap-3">
+            {isLoading && (
+              <div className="h-6 w-6 sm:h-8 sm:w-8 shrink-0 animate-spin-slow rounded-full border-2 border-border border-t-accent" />
+            )}
+            <div>
+              <h1 className="font-sans text-[24px] sm:text-[32px] font-normal tracking-tight text-text-primary">
+                Recommendations
+              </h1>
+              <p className="text-[14px] sm:text-[15px] text-text-secondary mt-1">
+                {isLoading ? 'Synthesizing recommendations...' : 'Improvements ranked by impact on your presentation goal.'}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Skeleton state */}

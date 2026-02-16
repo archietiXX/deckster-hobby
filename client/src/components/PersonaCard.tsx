@@ -58,7 +58,7 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
 
       {/* Expanded content */}
       {isExpanded && evaluation && (
-        <div className="px-4 sm:px-6 pb-4 sm:pb-6 flex flex-col gap-4 sm:gap-5 animate-fade-in">
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6 flex flex-col gap-6 animate-fade-in">
           {/* 1. Decision — color-coded by sentiment */}
           {evaluation.decision && (() => {
             const sentiment = evaluation.decisionSentiment ?? 'mixed';
@@ -104,7 +104,7 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
                   </svg>
                 )}
                 <div>
-                  <p className={`text-[11px] font-semibold uppercase tracking-wide ${styles.label} mb-1`}>
+                  <p className={`text-sm font-bold uppercase tracking-wide ${styles.label} mb-1`}>
                     Decision
                   </p>
                   <p className="text-[15px] leading-relaxed text-text-primary font-semibold">
@@ -115,18 +115,39 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
             );
           })()}
 
-          {/* 2. Core points */}
-          <div className="p-4 bg-bg-secondary border border-border rounded-lg">
-            <h4 className="text-xs font-semibold uppercase tracking-wide text-accent mb-2">
-              Core Points
-            </h4>
-            <ul className="list-none flex flex-col gap-2">
-              {evaluation.corePoints.map((point, i) => (
-                <li key={i} className="relative pl-4 text-sm leading-normal text-text-secondary before:content-[''] before:absolute before:left-0 before:top-[7px] before:w-[5px] before:h-[5px] before:rounded-full before:bg-accent">
-                  {point}
-                </li>
-              ))}
-            </ul>
+          {/* 2. Red Flags & Green Flags */}
+          <div className="flex flex-col gap-6">
+            {/* Green Flags */}
+            {evaluation.greenFlags.length > 0 && (
+              <div>
+                <h4 className="text-sm font-bold uppercase tracking-wide text-emerald-600 mb-2">
+                  Green Flags
+                </h4>
+                <ul className="list-none flex flex-col gap-2">
+                  {evaluation.greenFlags.map((point, i) => (
+                    <li key={i} className="relative pl-4 text-sm leading-relaxed text-text-primary before:content-[''] before:absolute before:left-0 before:top-[7px] before:w-[5px] before:h-[5px] before:rounded-full before:bg-emerald-500">
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Red Flags */}
+            {evaluation.redFlags.length > 0 && (
+              <div>
+                <h4 className="text-sm font-bold uppercase tracking-wide text-red-600 mb-2">
+                  Red Flags
+                </h4>
+                <ul className="list-none flex flex-col gap-2">
+                  {evaluation.redFlags.map((point, i) => (
+                    <li key={i} className="relative pl-4 text-sm leading-relaxed text-text-primary before:content-[''] before:absolute before:left-0 before:top-[7px] before:w-[5px] before:h-[5px] before:rounded-full before:bg-red-500">
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* 3. Detailed thinking — expandable */}

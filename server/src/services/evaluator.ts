@@ -4,7 +4,8 @@ import { buildEvaluationPrompt } from '../prompts/evaluation.js';
 
 interface EvaluationResponse {
   reaction: string;
-  corePoints: string[];
+  redFlags: string[];
+  greenFlags: string[];
   decision: string;
   decisionSentiment: 'positive' | 'negative' | 'mixed';
 }
@@ -29,7 +30,8 @@ export async function evaluateAsPersona(
   return {
     personaId: persona.id,
     reaction: result.reaction,
-    corePoints: result.corePoints,
+    redFlags: result.redFlags,
+    greenFlags: result.greenFlags,
     decision: result.decision,
     decisionSentiment: sentiment,
   };

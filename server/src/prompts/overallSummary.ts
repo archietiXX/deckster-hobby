@@ -29,7 +29,8 @@ Respond with a JSON object:
     .map((ev) => {
       const persona = personas.find((p) => p.id === ev.personaId);
       return `${persona?.name} (${persona?.title}): ${ev.decision}
-Key points: ${ev.corePoints.join('; ')}`;
+Green flags: ${ev.greenFlags.join('; ')}
+Red flags: ${ev.redFlags.join('; ')}`;
     })
     .join('\n\n');
 

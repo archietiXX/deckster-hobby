@@ -24,7 +24,8 @@ export interface Persona {
 export interface PersonaEvaluation {
   personaId: string;
   reaction: string;       // Inner-monologue style reaction with slide-specific stops
-  corePoints: string[];   // 3-5 bullet points
+  redFlags: string[];     // 2-4 concerns, weaknesses, or issues noticed
+  greenFlags: string[];   // 2-4 strengths, positive aspects, or what's working well
   decision: string;       // Final verdict personalized to the deck's goal
   decisionSentiment: 'positive' | 'negative' | 'mixed'; // For color-coding the verdict
 }

@@ -376,13 +376,36 @@ export function generateReport(data: ReportData): void {
     }
     y += 2;
 
-    // Core points
+    // Green flags
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    setTextColor(doc, [22, 163, 74]);
+    doc.text('GREEN FLAGS', MARGIN + 4, y);
+    y += 4;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     setTextColor(doc, colors.darkGray);
-    for (const point of evaluation.corePoints) {
+    for (const point of evaluation.greenFlags) {
       y = ensureSpace(doc, y, 5);
-      setFillColor(doc, accentCol);
+      setFillColor(doc, [22, 163, 74]);
+      doc.circle(MARGIN + 6, y - 1.2, 0.8, 'F');
+      y = renderWrappedText(doc, point, MARGIN + 10, y, CONTENT_WIDTH - 10, 4);
+      y += 1;
+    }
+    y += 3;
+
+    // Red flags
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    setTextColor(doc, [220, 38, 38]);
+    doc.text('RED FLAGS', MARGIN + 4, y);
+    y += 4;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    setTextColor(doc, colors.darkGray);
+    for (const point of evaluation.redFlags) {
+      y = ensureSpace(doc, y, 5);
+      setFillColor(doc, [220, 38, 38]);
       doc.circle(MARGIN + 6, y - 1.2, 0.8, 'F');
       y = renderWrappedText(doc, point, MARGIN + 10, y, CONTENT_WIDTH - 10, 4);
       y += 1;

@@ -11,7 +11,7 @@ export function buildEvaluationPrompt(
 BACKGROUND: ${persona.background}
 
 YOUR KEY CONCERNS about presentations like this:
-${persona.keyConcerns.map((c) => `- ${c}`).join('\n')}
+${persona.keyConcerns?.map((c) => `- ${c}`).join('\n') || 'N/A'}
 
 WHAT YOU LOOK FOR IN PRESENTATIONS:
 ${category.evidenceType}
@@ -43,7 +43,8 @@ INSTRUCTIONS FOR YOUR DECISION:
 RESPONSE FORMAT (respond in JSON):
 {
   "reaction": "Your inner monologue — each thought on its own line, separated by \\n. 15-25 lines of book-style inner voice.",
-  "corePoints": ["3 to 5 specific, actionable points — things the presenter did well or needs to improve. Each point should be a single clear sentence."],
+  "redFlags": ["2 to 4 specific concerns, weaknesses, or issues you noticed. Things that worried you, didn't work, or need fixing. Each should be a single clear sentence."],
+  "greenFlags": ["2 to 4 specific strengths, positives, or things that worked well. What impressed you, resonated, or was done right. Each should be a single clear sentence."],
   "decision": "Your final verdict on the presentation, framed naturally for the goal. 1-2 direct sentences.",
   "decisionSentiment": "positive | negative | mixed"
 }
