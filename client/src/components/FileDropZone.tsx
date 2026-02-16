@@ -179,7 +179,7 @@ export function FileDropZone({ onFileParsed }: FileDropZoneProps) {
           Stress-test your presentation against realistic audience expectations.
         </p>
       </div>
-      <Footer />
+      <Footer showSecurity />
     </div>
   );
 }
