@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type {
   AppScreen,
   SlideContent,
@@ -8,6 +8,7 @@ import type {
   RecommendationsResponse,
   OverallSummary,
 } from '@deckster/shared/types';
+import { loadSession, saveSession, clearSession } from './services/sessionStorage';
 import { FileDropZone } from './components/FileDropZone';
 import { SetupModal } from './components/SetupModal';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -27,6 +28,46 @@ export default function App() {
   const [overallSummary, setOverallSummary] = useState<OverallSummary | null>(null);
   const [fileName, setFileName] = useState('');
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
+
+  // Restore session on mount (handles page refresh / back-navigation)
+  useEffect(() => {
+    const saved = loadSession();
+    if (!saved || saved.screen === 'upload') return;
+
+    // If refreshed while recommendations were loading, go back to results
+    if (saved.screen === 'recommendations' && saved.recommendations.length === 0) {
+      saved.screen = 'results';
+    }
+
+    setScreen(saved.screen);
+    setSlideContents(saved.slideContents);
+    setGoal(saved.goal);
+    setSelectedAudiences(saved.selectedAudiences);
+    setAudienceContext(saved.audienceContext);
+    setPersonas(saved.personas);
+    setEvaluations(saved.evaluations);
+    setRecommendations(saved.recommendations);
+    setMainAdvice(saved.mainAdvice);
+    setOverallSummary(saved.overallSummary);
+    setFileName(saved.fileName);
+  }, []);
+
+  // Persist session on every state change
+  useEffect(() => {
+    saveSession({
+      screen,
+      slideContents,
+      goal,
+      selectedAudiences,
+      audienceContext,
+      personas,
+      evaluations,
+      recommendations,
+      mainAdvice,
+      overallSummary,
+      fileName,
+    });
+  }, [screen, slideContents, goal, selectedAudiences, audienceContext, personas, evaluations, recommendations, mainAdvice, overallSummary, fileName]);
 
   const handleFileParsed = useCallback((contents: SlideContent[], name: string) => {
     setSlideContents(contents);
@@ -59,6 +100,10 @@ export default function App() {
     setScreen('recommendations');
   }, []);
 
+  const handleGoToRecommendations = useCallback(() => {
+    setScreen('recommendations');
+  }, []);
+
   const handleShowRecommendations = useCallback((result: RecommendationsResponse) => {
     setMainAdvice(result.mainAdvice);
     setRecommendations(result.recommendations);
@@ -70,6 +115,7 @@ export default function App() {
   }, []);
 
   const handleStartOver = useCallback(() => {
+    clearSession();
     setScreen('upload');
     setSlideContents([]);
     setGoal('');
@@ -123,8 +169,10 @@ export default function App() {
           goal={goal}
           slideContents={slideContents}
           overallSummary={overallSummary}
+          hasRecommendations={recommendations.length > 0}
           onStartLoadingRecommendations={handleStartLoadingRecommendations}
           onShowRecommendations={handleShowRecommendations}
+          onGoToRecommendations={handleGoToRecommendations}
           onStartOver={handleStartOver}
         />
       )}

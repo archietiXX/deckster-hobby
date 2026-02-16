@@ -26,8 +26,10 @@ interface PersonaReactionsProps {
   goal: string;
   slideContents: SlideContent[];
   overallSummary: OverallSummary | null;
+  hasRecommendations: boolean;
   onStartLoadingRecommendations: () => void;
   onShowRecommendations: (result: RecommendationsResponse) => void;
+  onGoToRecommendations: () => void;
   onStartOver: () => void;
 }
 
@@ -37,8 +39,10 @@ export function PersonaReactions({
   goal,
   slideContents,
   overallSummary,
+  hasRecommendations,
   onStartLoadingRecommendations,
   onShowRecommendations,
+  onGoToRecommendations,
   onStartOver,
 }: PersonaReactionsProps) {
   const score = useMemo(() => computeSuccessScore(evaluations), [evaluations]);
@@ -56,6 +60,13 @@ export function PersonaReactions({
 
   const handleShowRecommendations = useCallback(async () => {
     window.posthog?.capture('Evaluator_recommend');
+
+    // If recommendations were already generated, just navigate back
+    if (hasRecommendations) {
+      onGoToRecommendations();
+      return;
+    }
+
     // Immediately show recommendations screen with loading state
     onStartLoadingRecommendations();
 
@@ -67,7 +78,7 @@ export function PersonaReactions({
       console.error('Failed to generate recommendations:', err);
       // TODO: Show error state in Recommendations screen
     }
-  }, [goal, personas, evaluations, slideContents, onStartLoadingRecommendations, onShowRecommendations]);
+  }, [goal, personas, evaluations, slideContents, hasRecommendations, onStartLoadingRecommendations, onShowRecommendations, onGoToRecommendations]);
 
   return (
     <div className="min-h-screen flex justify-center relative overflow-y-auto bg-bg-primary">
