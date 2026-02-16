@@ -49,14 +49,8 @@ export function PersonaReactions({
   const [expandedId, setExpandedId] = useState<string | null>(personas[0]?.id ?? null);
 
   const handleToggle = useCallback((id: string) => {
-    // DEBUG: Check if evaluation exists for this persona
-    const evaluation = evaluations.find((e) => e.personaId === id);
-    console.log('🔍 Toggle persona:', id, 'has evaluation:', !!evaluation);
-    console.log('All persona IDs:', personas.map(p => p.id));
-    console.log('All evaluation personaIds:', evaluations.map(e => e.personaId));
-
     setExpandedId((prev) => (prev === id ? null : id));
-  }, [evaluations, personas]);
+  }, []);
 
   const handleShowRecommendations = useCallback(async () => {
     window.posthog?.capture('Evaluator_recommend');
@@ -101,7 +95,7 @@ export function PersonaReactions({
             <h1 className="font-sans text-[24px] sm:text-[32px] font-normal tracking-tight text-text-primary">
               Panel Reactions
             </h1>
-            <p className="text-[15px] text-text-secondary mt-1">
+            <p className="text-[14px] sm:text-[15px] text-text-secondary mt-1">
               {personas.length} personas reviewed your presentation. Click each card to see their full feedback.
             </p>
           </div>
@@ -170,7 +164,7 @@ export function PersonaReactions({
           {overallSummary && (
             <div className="flex flex-col gap-6">
               <div>
-                <p className="text-sm font-bold uppercase tracking-wide text-emerald-600 mb-1.5">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600 mb-1.5">
                   What works well
                 </p>
                 <div className="flex flex-wrap gap-x-4 gap-y-2">
@@ -182,7 +176,7 @@ export function PersonaReactions({
                 </div>
               </div>
               <div>
-                <p className="text-sm font-bold uppercase tracking-wide text-red-500 mb-1.5">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-red-500 mb-1.5">
                   What needs work
                 </p>
                 <div className="flex flex-wrap gap-x-4 gap-y-2">
@@ -206,7 +200,7 @@ export function PersonaReactions({
               </p>
             </div>
             <button
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 border-none rounded-lg text-white font-sans text-[13px] font-semibold cursor-pointer transition-all duration-200 whitespace-nowrap shrink-0 w-full sm:w-auto justify-center shadow-[0_1px_3px_rgba(0,21,255,0.2)] bg-gradient-to-r from-accent via-accent-light to-accent bg-[length:200%_100%] animate-shimmer hover:shadow-[0_2px_8px_rgba(0,21,255,0.3)]"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 border-none rounded-lg text-white font-sans text-[14px] font-semibold cursor-pointer transition-all duration-200 whitespace-nowrap shrink-0 w-full sm:w-auto justify-center shadow-[0_1px_3px_rgba(0,21,255,0.2)] bg-gradient-to-r from-accent via-accent-light to-accent bg-[length:200%_100%] animate-shimmer hover:shadow-[0_2px_8px_rgba(0,21,255,0.3)]"
               onClick={handleShowRecommendations}
               type="button"
             >
@@ -221,10 +215,10 @@ export function PersonaReactions({
 
         {/* Detailed breakdown */}
         <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-          <h2 className="font-sans text-[22px] font-normal tracking-tight text-text-primary">
+          <h2 className="font-sans text-[18px] sm:text-[20px] font-semibold tracking-tight text-text-primary">
             Detailed breakdown
           </h2>
-          <p className="text-[14px] text-text-secondary mt-1">
+          <p className="text-[14px] sm:text-[15px] text-text-secondary mt-1">
             Each persona's full inner monologue and verdict.
           </p>
         </div>

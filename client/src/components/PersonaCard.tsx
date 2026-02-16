@@ -27,17 +27,14 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
       {/* Header -- always visible */}
       <button
         className="flex items-center gap-3 sm:gap-4 w-full px-4 sm:px-6 py-3 sm:py-4 bg-transparent border-none text-inherit cursor-pointer text-left font-sans hover:bg-bg-secondary/50"
-        onClick={(e) => {
-          console.log('🖱️ Card clicked:', persona.name, 'isExpanded:', isExpanded);
-          onToggle();
-        }}
+        onClick={() => onToggle()}
         type="button"
       >
         <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-accent/10 text-accent flex items-center justify-center text-lg sm:text-xl font-medium shrink-0">
           {persona.name.charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-semibold leading-snug text-text-primary">{persona.name}</h3>
+          <h3 className="text-[15px] font-semibold leading-snug text-text-primary">{persona.name}</h3>
           <p className="text-[13px] text-text-secondary mt-px">{persona.title}</p>
           <span className="inline-block mt-1 px-2 py-0.5 bg-bg-accent-light text-accent-light text-[11px] font-medium rounded-full">
             {categoryLabel}
@@ -104,10 +101,10 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
                   </svg>
                 )}
                 <div>
-                  <p className={`text-sm font-bold uppercase tracking-wide ${styles.label} mb-1`}>
+                  <p className={`text-[11px] font-semibold uppercase tracking-wide ${styles.label} mb-1`}>
                     Decision
                   </p>
-                  <p className="text-[15px] leading-relaxed text-text-primary font-semibold">
+                  <p className="text-[14px] leading-relaxed text-text-primary font-semibold">
                     {evaluation.decision}
                   </p>
                 </div>
@@ -120,12 +117,12 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
             {/* Green Flags */}
             {evaluation.greenFlags.length > 0 && (
               <div>
-                <h4 className="text-sm font-bold uppercase tracking-wide text-emerald-600 mb-2">
+                <h4 className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600 mb-2">
                   Green Flags
                 </h4>
                 <ul className="list-none flex flex-col gap-2">
                   {evaluation.greenFlags.map((point, i) => (
-                    <li key={i} className="relative pl-4 text-sm leading-relaxed text-text-primary before:content-[''] before:absolute before:left-0 before:top-[7px] before:w-[5px] before:h-[5px] before:rounded-full before:bg-emerald-500">
+                    <li key={i} className="relative pl-4 text-[14px] leading-relaxed text-text-primary before:content-[''] before:absolute before:left-0 before:top-[7px] before:w-[5px] before:h-[5px] before:rounded-full before:bg-emerald-500">
                       {point}
                     </li>
                   ))}
@@ -136,12 +133,12 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
             {/* Red Flags */}
             {evaluation.redFlags.length > 0 && (
               <div>
-                <h4 className="text-sm font-bold uppercase tracking-wide text-red-600 mb-2">
+                <h4 className="text-[11px] font-semibold uppercase tracking-wide text-red-600 mb-2">
                   Red Flags
                 </h4>
                 <ul className="list-none flex flex-col gap-2">
                   {evaluation.redFlags.map((point, i) => (
-                    <li key={i} className="relative pl-4 text-sm leading-relaxed text-text-primary before:content-[''] before:absolute before:left-0 before:top-[7px] before:w-[5px] before:h-[5px] before:rounded-full before:bg-red-500">
+                    <li key={i} className="relative pl-4 text-[14px] leading-relaxed text-text-primary before:content-[''] before:absolute before:left-0 before:top-[7px] before:w-[5px] before:h-[5px] before:rounded-full before:bg-red-500">
                       {point}
                     </li>
                   ))}

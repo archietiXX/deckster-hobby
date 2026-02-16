@@ -134,10 +134,10 @@ export function LoadingScreen({
             <div className="flex items-start gap-4">
               <div className="mt-0.5 h-6 w-6 shrink-0 animate-spin-slow rounded-full border-2 border-border border-t-accent" />
               <div>
-                <h2 className="font-sans text-[22px] font-normal leading-tight tracking-tight">
+                <h2 className="font-sans text-[18px] sm:text-[20px] font-semibold leading-tight tracking-tight">
                   Building your audience panel
                 </h2>
-                <p className="mt-1 text-sm text-text-secondary">
+                <p className="mt-1 text-[14px] text-text-secondary">
                   Generating realistic personas based on your audience selection...
                   <span className="text-[12px] text-text-secondary/60 ml-2">
                     {formatTime(remaining)}
@@ -156,10 +156,10 @@ export function LoadingScreen({
             <div className="flex items-start gap-4">
               <div className="mt-0.5 h-6 w-6 shrink-0 animate-spin-slow rounded-full border-2 border-border border-t-accent" />
               <div>
-                <h2 className="font-sans text-[22px] font-normal leading-tight tracking-tight">
+                <h2 className="font-sans text-[18px] sm:text-[20px] font-semibold leading-tight tracking-tight">
                   Your panel is reviewing the deck
                 </h2>
-                <p className="mt-1 text-sm text-text-secondary">
+                <p className="mt-1 text-[14px] text-text-secondary">
                   {completedIds.size} of {personas.length} evaluations complete
                   <span className="text-[12px] text-text-secondary/60 ml-2">
                     {formatTime(remaining)}
@@ -178,10 +178,10 @@ export function LoadingScreen({
             <div className="flex items-start gap-4">
               <div className="mt-0.5 h-6 w-6 shrink-0 animate-spin-slow rounded-full border-2 border-border border-t-accent" />
               <div>
-                <h2 className="font-sans text-[22px] font-normal leading-tight tracking-tight">
+                <h2 className="font-sans text-[18px] sm:text-[20px] font-semibold leading-tight tracking-tight">
                   Synthesizing overall assessment
                 </h2>
-                <p className="mt-1 text-sm text-text-secondary">
+                <p className="mt-1 text-[14px] text-text-secondary">
                   Combining all panel feedback into a verdict...
                   <span className="text-[12px] text-text-secondary/60 ml-2">
                     {formatTime(remaining)}
@@ -204,7 +204,7 @@ export function LoadingScreen({
                 <circle cx="12" cy="16.5" r="0.75" fill="currentColor" />
               </svg>
               <div>
-                <h2 className="font-sans text-[22px] font-normal leading-tight tracking-tight">
+                <h2 className="font-sans text-[18px] sm:text-[20px] font-semibold leading-tight tracking-tight">
                   Something went wrong
                 </h2>
                 <p className="mt-1 text-sm text-error">{error}</p>

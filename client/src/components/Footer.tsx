@@ -1,8 +1,4 @@
-interface FooterProps {
-  showSecurity?: boolean;
-}
-
-export function Footer({ showSecurity }: FooterProps) {
+export function Footer() {
   return (
     <div className="fixed bottom-0 left-0 right-0 py-3 text-center text-xs text-text-secondary/60 bg-bg-primary border-t border-border/30 z-10 flex items-center justify-center gap-3">
       <span>
@@ -16,8 +12,7 @@ export function Footer({ showSecurity }: FooterProps) {
           Deckster
         </a>
       </span>
-      {showSecurity && (
-        <>
+      <>
           <span className="text-border">·</span>
           <span className="relative group">
             <button
@@ -58,8 +53,7 @@ export function Footer({ showSecurity }: FooterProps) {
               <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-text-primary" />
             </div>
           </span>
-        </>
-      )}
+      </>
     </div>
   );
 }

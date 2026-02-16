@@ -95,8 +95,11 @@ export function FileDropZone({ onFileParsed }: FileDropZoneProps) {
         {/* Brand */}
         <div className="flex flex-col items-center gap-3 animate-fade-in-up">
           <img src="/logo-black.svg" alt="Deckster" className="h-7" />
-          <p className="font-sans text-[13px] font-medium tracking-[0.2em] uppercase text-text-secondary">
-            Evaluator
+          <p className="font-sans text-[13px] font-bold tracking-[0.2em] uppercase text-text-primary">
+            Feedback Simulator
+          </p>
+          <p className="text-[14px] sm:text-[15px] text-text-secondary/70 text-center max-w-[400px]">
+            Stress-test your presentation against realistic audience expectations.
           </p>
         </div>
 
@@ -134,7 +137,7 @@ export function FileDropZone({ onFileParsed }: FileDropZoneProps) {
           {isParsing ? (
             <div className="flex flex-col items-center gap-6 animate-fade-in">
               <div className="w-10 h-10 border-[2.5px] border-border border-t-accent rounded-full animate-spin-slow" />
-              <p className="text-center text-[15px] text-text-secondary leading-relaxed">
+              <p className="text-center text-[14px] sm:text-[15px] text-text-secondary leading-relaxed">
                 Extracting slides from<br />
                 <strong className="text-text-primary font-medium">{parsingFileName}</strong>
               </p>
@@ -152,10 +155,10 @@ export function FileDropZone({ onFileParsed }: FileDropZoneProps) {
                   <path d="M8 28V38C8 40.2091 9.79086 42 12 42H36C38.2091 42 40 40.2091 40 38V28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
                 </svg>
               </div>
-              <p className="font-sans text-[22px] font-normal text-text-primary">
-                Drop your deck here
+              <p className="font-sans text-[24px] sm:text-[32px] font-normal tracking-tight text-text-primary">
+                Drop your file here
               </p>
-              <p className="text-sm text-text-secondary">
+              <p className="text-[14px] text-text-secondary">
                 or click to browse — <span className="text-text-accent font-medium">.pptx</span> and <span className="text-text-accent font-medium">.pdf</span> supported
               </p>
             </>
@@ -174,12 +177,8 @@ export function FileDropZone({ onFileParsed }: FileDropZoneProps) {
           </div>
         )}
 
-        {/* Tagline */}
-        <p className="text-[15px] text-text-secondary/70 text-center max-w-[400px] animate-fade-in-up [animation-delay:300ms]">
-          Stress-test your presentation against realistic audience expectations.
-        </p>
       </div>
-      <Footer showSecurity />
+      <Footer />
     </div>
   );
 }

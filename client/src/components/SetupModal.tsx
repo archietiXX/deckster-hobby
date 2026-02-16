@@ -57,7 +57,7 @@ export function SetupModal({
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in-up">
           <button
-            className="flex items-center gap-2 px-3 py-2 bg-transparent border border-border rounded-lg text-text-secondary text-sm cursor-pointer transition-all duration-200 hover:border-gray-400 hover:text-text-primary hover:bg-white"
+            className="flex items-center gap-2 px-3 py-2 bg-transparent border border-border rounded-lg text-text-secondary text-[13px] cursor-pointer transition-all duration-200 hover:border-gray-400 hover:text-text-primary hover:bg-white"
             onClick={onBack}
             type="button"
           >
@@ -77,10 +77,10 @@ export function SetupModal({
 
         {/* Title */}
         <div className="animate-fade-in-up [animation-delay:50ms]">
-          <h1 className="text-[32px] font-normal tracking-tight leading-[1.2] mb-2 text-text-primary">
+          <h1 className="text-[24px] sm:text-[32px] font-normal tracking-tight leading-[1.2] mb-2 text-text-primary">
             Configure evaluation
           </h1>
-          <p className="text-[15px] text-text-secondary leading-relaxed max-w-[520px]">
+          <p className="text-[14px] sm:text-[15px] text-text-secondary leading-relaxed max-w-[520px]">
             Tell us about your presentation goal and who will be in the room.
             We'll build a realistic audience panel to review your deck.
           </p>
@@ -88,7 +88,7 @@ export function SetupModal({
 
         {/* Goal input */}
         <div className="flex flex-col gap-4 animate-fade-in-up [animation-delay:100ms]">
-          <label className="flex items-center gap-2 text-base font-medium text-text-primary" htmlFor="goal-input">
+          <label className="flex items-center gap-2 text-[15px] font-medium text-text-primary" htmlFor="goal-input">
             <span className="inline-flex items-center justify-center w-6 h-6 bg-accent text-white text-[13px] font-semibold rounded-full shrink-0">
               1
             </span>
@@ -106,7 +106,7 @@ export function SetupModal({
 
         {/* Audience selection */}
         <div className="flex flex-col gap-4 animate-fade-in-up [animation-delay:100ms]">
-          <label className="flex items-center gap-2 text-base font-medium text-text-primary">
+          <label className="flex items-center gap-2 text-[15px] font-medium text-text-primary">
             <span className="inline-flex items-center justify-center w-6 h-6 bg-accent text-white text-[13px] font-semibold rounded-full shrink-0">
               2
             </span>
@@ -132,7 +132,7 @@ export function SetupModal({
 
         {/* Additional context (optional) */}
         <div className="flex flex-col gap-3 animate-fade-in-up [animation-delay:130ms]">
-          <label className="flex items-center gap-2 text-base font-medium text-text-primary" htmlFor="context-input">
+          <label className="flex items-center gap-2 text-[15px] font-medium text-text-primary" htmlFor="context-input">
             <span className="inline-flex items-center justify-center w-6 h-6 bg-bg-secondary text-text-secondary text-[13px] font-semibold rounded-full shrink-0 border border-border">
               3
             </span>
@@ -152,7 +152,7 @@ export function SetupModal({
         {/* Evaluate button */}
         <div className="flex flex-col items-start gap-2 pt-4 animate-fade-in-up [animation-delay:150ms]">
           <button
-            className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-7 bg-accent border-none rounded-lg text-white text-base font-semibold cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] hover:not-disabled:bg-accent-hover hover:not-disabled:-translate-y-px active:not-disabled:translate-y-0 disabled:opacity-35 disabled:cursor-not-allowed"
+            className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-7 bg-accent border-none rounded-lg text-white text-[14px] font-semibold cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] hover:not-disabled:bg-accent-hover hover:not-disabled:-translate-y-px active:not-disabled:translate-y-0 disabled:opacity-35 disabled:cursor-not-allowed"
             onClick={() => { window.posthog?.capture('Evaluator_start'); onEvaluate(); }}
             disabled={!isReady}
             type="button"

@@ -381,7 +381,7 @@ export function Recommendations({
         {/* Header */}
         <div className="flex items-center justify-between animate-fade-in-up">
           <button
-            className="flex items-center gap-1 px-3 sm:px-4 py-2 bg-transparent border border-border rounded-lg text-text-secondary font-sans text-sm cursor-pointer transition-all duration-200 hover:border-gray-400 hover:text-text-primary hover:bg-bg-primary"
+            className="flex items-center gap-1 px-3 sm:px-4 py-2 bg-transparent border border-border rounded-lg text-text-secondary font-sans text-[13px] cursor-pointer transition-all duration-200 hover:border-gray-400 hover:text-text-primary hover:bg-bg-primary"
             onClick={onBack}
             type="button"
           >
@@ -393,7 +393,7 @@ export function Recommendations({
           </button>
           <div className="flex items-center gap-2">
             <button
-              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 border-none rounded-lg text-white font-sans text-[13px] font-semibold transition-all duration-200 ${
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 border-none rounded-lg text-white font-sans text-[14px] font-semibold transition-all duration-200 ${
                 isLoading
                   ? 'opacity-35 cursor-not-allowed'
                   : 'cursor-pointer shadow-[0_1px_3px_rgba(0,21,255,0.2)] bg-gradient-to-r from-accent via-accent-light to-accent bg-[length:200%_100%] animate-shimmer hover:shadow-[0_2px_8px_rgba(0,21,255,0.3)]'
@@ -463,7 +463,7 @@ export function Recommendations({
               <svg className="w-5 h-5 text-accent shrink-0" viewBox="0 0 20 20" fill="none">
                 <path d="M10 2L12.09 7.26L18 8.27L14 12.14L14.81 18.02L10 15.27L5.19 18.02L6 12.14L2 8.27L7.91 7.26L10 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <h2 className="text-[13px] font-semibold uppercase tracking-wide text-accent">
+              <h2 className="text-[11px] font-semibold uppercase tracking-wide text-accent">
                 Strategic Advice
               </h2>
             </div>
@@ -476,7 +476,7 @@ export function Recommendations({
         {/* Section 1: Deck Structure */}
         {!isLoading && structureAdvice.length > 0 && (
           <div className="flex flex-col gap-3 animate-fade-in-up mt-4 sm:mt-6" style={{ animationDelay: '0.15s' }}>
-            <h2 className="text-[15px] sm:text-[17px] font-semibold text-text-primary">
+            <h2 className="text-[18px] sm:text-[20px] font-semibold text-text-primary">
               Deck Structure
             </h2>
             <div className="flex flex-col gap-2">
@@ -492,7 +492,7 @@ export function Recommendations({
           <div className="flex flex-col gap-5 animate-fade-in-up mt-4 sm:mt-6" style={{ animationDelay: '0.2s' }}>
             {/* Section header with inline filter */}
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-[15px] sm:text-[17px] font-semibold text-text-primary mr-2">
+              <h2 className="text-[18px] sm:text-[20px] font-semibold text-text-primary mr-2">
                 Slide Improvements
               </h2>
               {availablePriorities.length > 1 && (

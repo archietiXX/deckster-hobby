@@ -11,7 +11,7 @@ export function AudienceChip({ category, isSelected, onToggle }: AudienceChipPro
     <button
       className={`
         inline-flex items-center gap-1.5 px-3.5 py-2
-        rounded-full text-sm font-normal whitespace-nowrap
+        rounded-full text-[14px] font-normal whitespace-nowrap
         cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
         ${
           isSelected
