@@ -153,7 +153,7 @@ export function SetupModal({
         <div className="flex flex-col items-start gap-2 pt-4 animate-fade-in-up [animation-delay:150ms]">
           <button
             className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-7 bg-accent border-none rounded-lg text-white text-base font-semibold cursor-pointer transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] hover:not-disabled:bg-accent-hover hover:not-disabled:-translate-y-px active:not-disabled:translate-y-0 disabled:opacity-35 disabled:cursor-not-allowed"
-            onClick={onEvaluate}
+            onClick={() => { window.posthog?.capture('Evaluator_start'); onEvaluate(); }}
             disabled={!isReady}
             type="button"
           >

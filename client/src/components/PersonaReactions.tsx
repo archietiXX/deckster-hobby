@@ -55,6 +55,7 @@ export function PersonaReactions({
   }, [evaluations, personas]);
 
   const handleShowRecommendations = useCallback(async () => {
+    window.posthog?.capture('Evaluator_recommend');
     // Immediately show recommendations screen with loading state
     onStartLoadingRecommendations();
 

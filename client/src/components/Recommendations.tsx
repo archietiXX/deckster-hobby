@@ -81,6 +81,7 @@ export function Recommendations({
   };
 
   const handleSaveReport = () => {
+    window.posthog?.capture('Evaluator_report');
     generateReport({
       goal,
       personas,
