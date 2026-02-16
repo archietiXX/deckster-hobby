@@ -106,7 +106,7 @@ Each recommendation must include a "slideNumbers" array indicating which slide(s
   const feedbackSummary = evaluations
     .map((ev) => {
       const persona = personas.find((p) => p.id === ev.personaId);
-      return `## ${persona?.name} (${persona?.title})
+      return `## ${persona?.name} (${persona?.title}) [id: ${persona?.id}]
 Reaction: ${ev.reaction}
 
 Green Flags:

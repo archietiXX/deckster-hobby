@@ -158,8 +158,8 @@ function StructureItem({
   const [expanded, setExpanded] = useState<'why' | 'addresses' | null>(null);
 
   return (
-    <div className="flex gap-3 items-start">
-      <span className={`px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide rounded border shrink-0 mt-[2px] ${ac.badge}`}>
+    <div className="flex flex-col gap-1.5">
+      <span className={`px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide rounded border self-start ${ac.badge}`}>
         {ac.icon} {ac.label}
       </span>
       <div className="flex flex-col gap-1 min-w-0">
@@ -293,7 +293,10 @@ export function Recommendations({
   onStartOver,
 }: RecommendationsProps) {
   const getPersonaLabel = (id: string) => {
-    const p = personas.find((p) => p.id === id) ?? personas.find((p) => p.name === id);
+    const p =
+      personas.find((p) => p.id === id) ??
+      personas.find((p) => p.name === id) ??
+      personas.find((p) => p.name.toLowerCase() === id.toLowerCase());
     return p ? `${p.name}, ${p.title}` : id;
   };
 
