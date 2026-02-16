@@ -13,6 +13,8 @@ interface RecommendationsProps {
   goal: string;
   slideContents: SlideContent[];
   isLoading?: boolean;
+  error?: string;
+  onRetry: () => void;
   onBack: () => void;
   onStartOver: () => void;
 }
@@ -108,48 +110,39 @@ function SkeletonCard({ index }: { index: number }) {
   );
 }
 
-function AddressesConcerns({
-  personaIds,
-  getPersonaLabel,
+/** Inline chevron button — expanded content rendered separately by parent */
+function AddressesConcernsToggle({
+  count,
+  isExpanded,
+  onToggle,
 }: {
-  personaIds: string[];
-  getPersonaLabel: (id: string) => string;
+  count: number;
+  isExpanded: boolean;
+  onToggle: () => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  if (personaIds.length === 0) return null;
-
+  if (count === 0) return null;
   return (
-    <div className="flex flex-col gap-1">
-      <button
-        type="button"
-        onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-1.5 text-[11px] sm:text-[12px] text-text-secondary/60 hover:text-text-secondary transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 text-left"
-      >
-        <span>
-          Addresses concerns of {personaIds.length} {personaIds.length === 1 ? 'person' : 'people'}
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex items-center gap-1.5 text-[11px] sm:text-[12px] text-text-secondary/60 hover:text-text-secondary transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 text-left"
+    >
+      <span>Addresses concerns of {count} {count === 1 ? 'person' : 'people'}</span>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}>
+        <path d="M4.5 3L7.5 6L4.5 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  );
+}
+
+function PersonaPills({ personaIds, getPersonaLabel }: { personaIds: string[]; getPersonaLabel: (id: string) => string }) {
+  return (
+    <div className="flex flex-wrap gap-1.5 pl-0.5 animate-fade-in">
+      {personaIds.map((id) => (
+        <span key={id} className="px-2 py-0.5 bg-bg-accent-light text-accent-light rounded-full text-[10px] sm:text-[11px] font-medium">
+          {getPersonaLabel(id)}
         </span>
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          fill="none"
-          className={`transition-transform duration-150 ${expanded ? 'rotate-90' : ''}`}
-        >
-          <path d="M4.5 3L7.5 6L4.5 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-      {expanded && (
-        <div className="flex flex-wrap gap-1.5 pl-0.5 animate-fade-in">
-          {personaIds.map((id) => (
-            <span
-              key={id}
-              className="px-2 py-0.5 bg-bg-accent-light text-accent-light rounded-full text-[10px] sm:text-[11px] font-medium"
-            >
-              {getPersonaLabel(id)}
-            </span>
-          ))}
-        </div>
-      )}
+      ))}
     </div>
   );
 }
@@ -162,7 +155,7 @@ function StructureItem({
   getPersonaLabel: (id: string) => string;
 }) {
   const ac = actionConfig[sa.action] ?? actionConfig.add;
-  const [whyExpanded, setWhyExpanded] = useState(false);
+  const [expanded, setExpanded] = useState<'why' | 'addresses' | null>(null);
 
   return (
     <div className="flex gap-3 items-start">
@@ -171,11 +164,11 @@ function StructureItem({
       </span>
       <div className="flex flex-col gap-1 min-w-0">
         <p className="text-[13px] leading-[1.6] text-text-primary">{sa.description}</p>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-3">
           {sa.rationale && (
             <button
               type="button"
-              onClick={() => setWhyExpanded(!whyExpanded)}
+              onClick={() => setExpanded(expanded === 'why' ? null : 'why')}
               className="flex items-center gap-1.5 text-[11px] sm:text-[12px] text-text-secondary/60 hover:text-text-secondary transition-colors duration-150 cursor-pointer bg-transparent border-none p-0"
             >
               <span>Why?</span>
@@ -184,18 +177,25 @@ function StructureItem({
                 height="12"
                 viewBox="0 0 12 12"
                 fill="none"
-                className={`transition-transform duration-150 ${whyExpanded ? 'rotate-90' : ''}`}
+                className={`transition-transform duration-150 ${expanded === 'why' ? 'rotate-90' : ''}`}
               >
                 <path d="M4.5 3L7.5 6L4.5 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           )}
-          <AddressesConcerns personaIds={sa.relatedPersonaIds} getPersonaLabel={getPersonaLabel} />
+          <AddressesConcernsToggle
+            count={sa.relatedPersonaIds.length}
+            isExpanded={expanded === 'addresses'}
+            onToggle={() => setExpanded(expanded === 'addresses' ? null : 'addresses')}
+          />
         </div>
-        {whyExpanded && sa.rationale && (
+        {expanded === 'why' && sa.rationale && (
           <p className="text-[12px] sm:text-[13px] leading-[1.7] text-text-secondary/80 italic pl-0.5 animate-fade-in">
             {sa.rationale}
           </p>
+        )}
+        {expanded === 'addresses' && sa.relatedPersonaIds.length > 0 && (
+          <PersonaPills personaIds={sa.relatedPersonaIds} getPersonaLabel={getPersonaLabel} />
         )}
       </div>
     </div>
@@ -213,7 +213,7 @@ function RecBullet({
 }) {
   const config = priorityConfig[rec.priority] ?? priorityConfig.consider;
   const extraSlides = (rec.slideNumbers ?? []).slice(1);
-  const [whyExpanded, setWhyExpanded] = useState(false);
+  const [expanded, setExpanded] = useState<'why' | 'addresses' | null>(null);
 
   return (
     <div
@@ -239,11 +239,11 @@ function RecBullet({
           ))}
         </div>
         <p className="text-[13px] leading-[1.6] text-text-secondary">{rec.text}</p>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-3">
           {rec.priorityRationale && (
             <button
               type="button"
-              onClick={() => setWhyExpanded(!whyExpanded)}
+              onClick={() => setExpanded(expanded === 'why' ? null : 'why')}
               className="flex items-center gap-1.5 text-[11px] sm:text-[12px] text-text-secondary/60 hover:text-text-secondary transition-colors duration-150 cursor-pointer bg-transparent border-none p-0"
             >
               <span>Why?</span>
@@ -252,18 +252,25 @@ function RecBullet({
                 height="12"
                 viewBox="0 0 12 12"
                 fill="none"
-                className={`transition-transform duration-150 ${whyExpanded ? 'rotate-90' : ''}`}
+                className={`transition-transform duration-150 ${expanded === 'why' ? 'rotate-90' : ''}`}
               >
                 <path d="M4.5 3L7.5 6L4.5 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           )}
-          <AddressesConcerns personaIds={rec.relatedPersonaIds} getPersonaLabel={getPersonaLabel} />
+          <AddressesConcernsToggle
+            count={rec.relatedPersonaIds.length}
+            isExpanded={expanded === 'addresses'}
+            onToggle={() => setExpanded(expanded === 'addresses' ? null : 'addresses')}
+          />
         </div>
-        {whyExpanded && rec.priorityRationale && (
+        {expanded === 'why' && rec.priorityRationale && (
           <p className="text-[12px] sm:text-[13px] leading-[1.7] text-text-secondary/80 italic pl-0.5 animate-fade-in">
             {rec.priorityRationale}
           </p>
+        )}
+        {expanded === 'addresses' && rec.relatedPersonaIds.length > 0 && (
+          <PersonaPills personaIds={rec.relatedPersonaIds} getPersonaLabel={getPersonaLabel} />
         )}
       </div>
     </div>
@@ -280,11 +287,13 @@ export function Recommendations({
   goal,
   slideContents,
   isLoading,
+  error,
+  onRetry,
   onBack,
   onStartOver,
 }: RecommendationsProps) {
   const getPersonaLabel = (id: string) => {
-    const p = personas.find((p) => p.id === id);
+    const p = personas.find((p) => p.id === id) ?? personas.find((p) => p.name === id);
     return p ? `${p.name}, ${p.title}` : id;
   };
 
@@ -436,6 +445,36 @@ export function Recommendations({
             </div>
           </div>
         </div>
+
+        {/* Error state */}
+        {!isLoading && error && (
+          <div className="flex flex-col items-center gap-4 py-12 animate-fade-in">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-error">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M12 7V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <circle cx="12" cy="16.5" r="0.75" fill="currentColor" />
+              </svg>
+            </div>
+            <div className="text-center">
+              <p className="text-[14px] font-semibold text-text-primary">Failed to generate recommendations</p>
+              <p className="text-[13px] text-text-secondary mt-1 max-w-[360px]">{error}</p>
+            </div>
+            <button
+              className="mt-2 inline-flex items-center gap-1.5 px-5 py-2.5 bg-accent border-none rounded-lg text-white text-[14px] font-semibold cursor-pointer transition-all duration-200 hover:bg-accent-hover"
+              onClick={onRetry}
+              type="button"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 8a6 6 0 0110.89-3.48" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M14 8a6 6 0 01-10.89 3.48" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <path d="M14 2v4h-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 14v-4h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Try again
+            </button>
+          </div>
+        )}
 
         {/* Skeleton state */}
         {isLoading && (

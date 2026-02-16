@@ -6,9 +6,9 @@ import type {
   PersonaEvaluation,
   Recommendation,
   StructureAdvice,
-  RecommendationsResponse,
   OverallSummary,
 } from '@deckster/shared/types';
+import { fetchRecommendations } from './services/api';
 import { loadSession, saveSession, clearSession } from './services/sessionStorage';
 import { FileDropZone } from './components/FileDropZone';
 import { SetupModal } from './components/SetupModal';
@@ -30,6 +30,7 @@ export default function App() {
   const [overallSummary, setOverallSummary] = useState<OverallSummary | null>(null);
   const [fileName, setFileName] = useState('');
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false);
+  const [recommendationsError, setRecommendationsError] = useState('');
 
   // Restore session on mount (handles page refresh / back-navigation)
   useEffect(() => {
@@ -99,21 +100,32 @@ export default function App() {
     setScreen('results');
   }, []);
 
-  const handleStartLoadingRecommendations = useCallback(() => {
+  const doFetchRecommendations = useCallback(async () => {
     setIsLoadingRecommendations(true);
+    setRecommendationsError('');
     setScreen('recommendations');
-  }, []);
+    try {
+      const result = await fetchRecommendations(goal, personas, evaluations, slideContents);
+      setMainAdvice(result.mainAdvice);
+      setStructureAdvice(result.structureAdvice ?? []);
+      setRecommendations(result.recommendations);
+      setIsLoadingRecommendations(false);
+    } catch (err) {
+      setIsLoadingRecommendations(false);
+      setRecommendationsError(
+        err instanceof Error ? err.message : 'Failed to generate recommendations. Please try again.',
+      );
+    }
+  }, [goal, personas, evaluations, slideContents]);
 
-  const handleGoToRecommendations = useCallback(() => {
-    setScreen('recommendations');
-  }, []);
-
-  const handleShowRecommendations = useCallback((result: RecommendationsResponse) => {
-    setMainAdvice(result.mainAdvice);
-    setStructureAdvice(result.structureAdvice ?? []);
-    setRecommendations(result.recommendations);
-    setIsLoadingRecommendations(false);
-  }, []);
+  const handleRequestRecommendations = useCallback(() => {
+    window.posthog?.capture('Evaluator_recommend');
+    if (recommendations.length > 0) {
+      setScreen('recommendations');
+      return;
+    }
+    doFetchRecommendations();
+  }, [recommendations.length, doFetchRecommendations]);
 
   const handleBackToResults = useCallback(() => {
     setScreen('results');
@@ -173,12 +185,8 @@ export default function App() {
           personas={personas}
           evaluations={evaluations}
           goal={goal}
-          slideContents={slideContents}
           overallSummary={overallSummary}
-          hasRecommendations={recommendations.length > 0}
-          onStartLoadingRecommendations={handleStartLoadingRecommendations}
-          onShowRecommendations={handleShowRecommendations}
-          onGoToRecommendations={handleGoToRecommendations}
+          onRequestRecommendations={handleRequestRecommendations}
           onStartOver={handleStartOver}
         />
       )}
@@ -194,6 +202,8 @@ export default function App() {
           goal={goal}
           slideContents={slideContents}
           isLoading={isLoadingRecommendations}
+          error={recommendationsError}
+          onRetry={doFetchRecommendations}
           onBack={handleBackToResults}
           onStartOver={handleStartOver}
         />

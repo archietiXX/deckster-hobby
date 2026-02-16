@@ -1,6 +1,5 @@
-import { useState, useCallback, useMemo, useRef } from 'react';
-import type { Persona, PersonaEvaluation, Recommendation, RecommendationsResponse, OverallSummary, SlideContent } from '@deckster/shared/types';
-import { fetchRecommendations } from '../services/api';
+import { useState, useCallback, useMemo } from 'react';
+import type { Persona, PersonaEvaluation, OverallSummary } from '@deckster/shared/types';
 import { PersonaCard } from './PersonaCard';
 import { Footer } from './Footer';
 
@@ -24,12 +23,8 @@ interface PersonaReactionsProps {
   personas: Persona[];
   evaluations: PersonaEvaluation[];
   goal: string;
-  slideContents: SlideContent[];
   overallSummary: OverallSummary | null;
-  hasRecommendations: boolean;
-  onStartLoadingRecommendations: () => void;
-  onShowRecommendations: (result: RecommendationsResponse) => void;
-  onGoToRecommendations: () => void;
+  onRequestRecommendations: () => void;
   onStartOver: () => void;
 }
 
@@ -37,12 +32,8 @@ export function PersonaReactions({
   personas,
   evaluations,
   goal,
-  slideContents,
   overallSummary,
-  hasRecommendations,
-  onStartLoadingRecommendations,
-  onShowRecommendations,
-  onGoToRecommendations,
+  onRequestRecommendations,
   onStartOver,
 }: PersonaReactionsProps) {
   const score = useMemo(() => computeSuccessScore(evaluations), [evaluations]);
@@ -52,27 +43,9 @@ export function PersonaReactions({
     setExpandedId((prev) => (prev === id ? null : id));
   }, []);
 
-  const handleShowRecommendations = useCallback(async () => {
-    window.posthog?.capture('Evaluator_recommend');
-
-    // If recommendations were already generated, just navigate back
-    if (hasRecommendations) {
-      onGoToRecommendations();
-      return;
-    }
-
-    // Immediately show recommendations screen with loading state
-    onStartLoadingRecommendations();
-
-    // Fetch recommendations in the background
-    try {
-      const result = await fetchRecommendations(goal, personas, evaluations, slideContents);
-      onShowRecommendations(result);
-    } catch (err) {
-      console.error('Failed to generate recommendations:', err);
-      // TODO: Show error state in Recommendations screen
-    }
-  }, [goal, personas, evaluations, slideContents, hasRecommendations, onStartLoadingRecommendations, onShowRecommendations, onGoToRecommendations]);
+  const handleShowRecommendations = useCallback(() => {
+    onRequestRecommendations();
+  }, [onRequestRecommendations]);
 
   return (
     <div className="min-h-screen flex justify-center relative overflow-y-auto bg-bg-primary">
