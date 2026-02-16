@@ -26,6 +26,7 @@ export interface PersonaEvaluation {
   reaction: string;       // Inner-monologue style reaction with slide-specific stops
   redFlags: string[];     // 2-4 concerns, weaknesses, or issues noticed
   greenFlags: string[];   // 2-4 strengths, positive aspects, or what's working well
+  questions: string[];    // 2-3 questions they'd ask in Q&A
   decision: string;       // Final verdict personalized to the deck's goal
   decisionSentiment: 'positive' | 'negative' | 'mixed'; // For color-coding the verdict
 }

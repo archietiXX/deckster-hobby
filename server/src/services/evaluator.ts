@@ -6,6 +6,7 @@ interface EvaluationResponse {
   reaction: string;
   redFlags: string[];
   greenFlags: string[];
+  questions: string[];
   decision: string;
   decisionSentiment: 'positive' | 'negative' | 'mixed';
 }
@@ -32,6 +33,7 @@ export async function evaluateAsPersona(
     reaction: result.reaction,
     redFlags: result.redFlags,
     greenFlags: result.greenFlags,
+    questions: result.questions ?? [],
     decision: result.decision,
     decisionSentiment: sentiment,
   };

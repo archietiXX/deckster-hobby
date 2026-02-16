@@ -413,6 +413,29 @@ export function generateReport(data: ReportData): void {
       y = renderWrappedText(doc, point, MARGIN + 10, y, CONTENT_WIDTH - 10, 4);
       y += 1;
     }
+    y += 3;
+
+    // Questions they'd ask
+    if (evaluation.questions?.length > 0) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      setTextColor(doc, [100, 116, 139]); // slate-500
+      doc.text('QUESTIONS THEY\'D ASK', MARGIN + 4, y);
+      y += 4;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      setTextColor(doc, colors.darkGray);
+      for (const q of evaluation.questions) {
+        y = ensureSpace(doc, y, 5);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        setTextColor(doc, [148, 163, 184]); // slate-400
+        doc.text('?', MARGIN + 6, y);
+        setTextColor(doc, colors.darkGray);
+        y = renderWrappedText(doc, q, MARGIN + 10, y, CONTENT_WIDTH - 10, 4);
+        y += 1;
+      }
+    }
 
     y += 6;
   }

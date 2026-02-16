@@ -147,7 +147,24 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
             )}
           </div>
 
-          {/* 3. Detailed thinking — expandable */}
+          {/* 3. Questions they'd ask */}
+          {evaluation.questions?.length > 0 && (
+            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
+              <h4 className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2.5">
+                Questions they'd ask
+              </h4>
+              <ul className="list-none flex flex-col gap-2">
+                {evaluation.questions.map((q, i) => (
+                  <li key={i} className="relative pl-5 text-[13px] leading-relaxed text-text-primary">
+                    <span className="absolute left-0 top-0 text-slate-400">?</span>
+                    {q}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* 4. Detailed thinking — expandable */}
           <div>
             <button
               className="flex items-center gap-1.5 text-[13px] text-text-secondary hover:text-text-primary transition-colors duration-150 cursor-pointer bg-transparent border-none p-0 font-sans"
