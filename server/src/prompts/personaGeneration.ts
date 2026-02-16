@@ -9,9 +9,11 @@ export function buildPersonaGenerationPrompt(
   const categoryList = categories
     .map(
       (c) =>
-        `- **${c.label}** (id: ${c.id}): Looks for ${c.evidenceType}. Communication style: ${c.languageRules}`
+        `### ${c.label} (id: ${c.id})
+**Evidence they expect:** ${c.evidenceType}
+**How they think and communicate:** ${c.languageRules}`
     )
-    .join('\n');
+    .join('\n\n');
 
   const system = `You are an expert at simulating realistic audience members for presentation evaluations.
 
@@ -40,6 +42,9 @@ HOW TO DETERMINE PERSONA COUNT (generate between 1 and 7 personas):
 
 IMPORTANT RULES:
 - Each persona must feel like a real individual with specific professional concerns
+- THE AUDIENCE CATEGORY CHARACTERISTICS ARE THE CORE DNA OF EACH PERSONA. The "evidence they expect" defines what this person looks for and what makes them skeptical or convinced. The "how they think and communicate" defines their internal voice, vocabulary, formality level, and reasoning patterns. These are not suggestions — they are hard constraints on who this person is.
+- Each persona's "keyConcerns" MUST directly reflect the evidence types their category expects. An investor persona should worry about TAM, burn rate, and unit economics — not generic "is this a good idea?" concerns. A board member should worry about fiduciary risk and governance — not operational details.
+- Each persona's "background" should explain WHY they care about the evidence types their category defines. Their career history and professional experience should naturally produce the priorities their category specifies.
 - NAMES MUST MATCH THE CULTURAL CONTEXT of the presentation. Infer the likely country/region from the slide content, company names, language cues, or goal. If the content is German, use German names. If Japanese, use Japanese names. If American, use American names. Always use a realistic diverse mix of names from that culture — not all the same ethnicity. If no cultural signal is detectable, default to a diverse international mix.
 - Give each persona a realistic full name and specific job title
 - Personas should represent a diverse range of perspectives within and across categories
@@ -49,8 +54,8 @@ Respond with a JSON object containing a "personas" array, each having:
 - "name": realistic full name
 - "title": specific job title
 - "role": their role relative to the presenter (e.g., "decision-maker", "budget holder", "end user")
-- "background": 1-2 sentences about their professional background and what shaped their perspective
-- "keyConcerns": array of 3-4 specific concerns they would have about this presentation
+- "background": 1-2 sentences about their professional background and what shaped their perspective. Must explain why they prioritize the evidence types defined for their audience category.
+- "keyConcerns": array of 3-4 specific concerns they would have about this presentation. Must be grounded in the evidence types their audience category expects — use the specific terminology and frameworks from the category definition.
 - "audienceCategoryId": the id of the audience category they belong to`;
 
   const contextBlock = audienceContext?.trim()
