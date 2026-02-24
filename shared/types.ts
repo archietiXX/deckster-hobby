@@ -7,6 +7,11 @@ export interface AudienceCategory {
   languageRules: string;
 }
 
+export interface AudienceSelection {
+  categoryId: string;
+  knowledgeLevel: string;
+}
+
 // ── Personas ──
 
 export interface Persona {
@@ -17,6 +22,7 @@ export interface Persona {
   background: string;
   keyConcerns: string[];
   audienceCategoryId: string;
+  knowledgeLevel: string;
 }
 
 // ── Evaluation ──
@@ -54,7 +60,7 @@ export interface OverallSummary {
 export interface EvaluateRequest {
   slideContents: SlideContent[];
   goal: string;
-  audienceCategoryIds: string[];
+  audienceSelections: AudienceSelection[];
   audienceContext?: string; // Optional additional context about the audience
 }
 
