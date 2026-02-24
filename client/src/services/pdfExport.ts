@@ -70,6 +70,27 @@ function ensureSpace(doc: jsPDF, y: number, needed: number): number {
   return y;
 }
 
+/**
+ * Sanitize text for jsPDF rendering.
+ * jsPDF's built-in Helvetica only supports WinAnsi (Latin-1).
+ * Unicode chars like smart quotes, em dashes, etc. render as garbled glyphs.
+ */
+function sanitize(text: string): string {
+  return text
+    .replace(/[\u2018\u2019\u201A\u275C]/g, "'")   // smart single quotes → '
+    .replace(/[\u201C\u201D\u201E\u275D\u275E]/g, '"') // smart double quotes → "
+    .replace(/\u2014/g, ' -- ')  // em dash → --
+    .replace(/\u2013/g, '-')     // en dash → -
+    .replace(/\u2026/g, '...')   // ellipsis → ...
+    .replace(/\u2022/g, '-')     // bullet → -
+    .replace(/\u00A0/g, ' ')     // non-breaking space → space
+    .replace(/\u200B/g, '')      // zero-width space → remove
+    .replace(/[\u2032\u2035]/g, "'") // prime marks → '
+    .replace(/[\u2033\u2036]/g, '"') // double prime → "
+    .replace(/\u2212/g, '-')     // minus sign → -
+    .replace(/[^\x00-\xFF]/g, ''); // drop any remaining non-Latin-1 chars
+}
+
 function getCategoryLabel(audienceCategoryId: string): string {
   const cat = audienceCategories.find((c) => c.id === audienceCategoryId);
   return cat ? cat.label : audienceCategoryId;
@@ -139,24 +160,36 @@ function formatDate(): string {
   });
 }
 
+function formatDateTime(): string {
+  const now = new Date();
+  return now.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }) + ' at ' + now.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 /** Draw a thin horizontal divider line */
 function drawDivider(doc: jsPDF, y: number): number {
   setDrawColor(doc, colors.border);
   doc.setLineWidth(0.3);
   doc.line(MARGIN, y, MARGIN + CONTENT_WIDTH, y);
-  return y + 4;
+  return y + 5;
 }
 
 /** Draw a section header with divider */
 function drawSectionHeader(doc: jsPDF, y: number, title: string): number {
-  y = ensureSpace(doc, y, 16);
+  y = ensureSpace(doc, y, 18);
   y = drawDivider(doc, y);
-  y += 2;
+  y += 3;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
   setTextColor(doc, colors.darkGray);
   doc.text(title, MARGIN, y);
-  y += 8;
+  y += 10;
   return y;
 }
 
@@ -169,7 +202,7 @@ function renderWrappedText(
   maxWidth: number,
   lineHeight: number
 ): number {
-  const lines: string[] = doc.splitTextToSize(text, maxWidth);
+  const lines: string[] = doc.splitTextToSize(sanitize(text), maxWidth);
   for (const line of lines) {
     y = ensureSpace(doc, y, lineHeight);
     doc.text(line, x, y);
@@ -201,9 +234,17 @@ export function generateReport(data: ReportData): void {
   setTextColor(doc, colors.gray);
   doc.text('EVALUATION REPORT', MARGIN + decksterWidth + 3, y);
 
-  y += 4;
+  // Export date/time — right-aligned on same line as title
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  setTextColor(doc, colors.lightGray);
+  const dateTimeStr = formatDateTime();
+  const dateTimeWidth = doc.getTextWidth(dateTimeStr);
+  doc.text(dateTimeStr, MARGIN + CONTENT_WIDTH - dateTimeWidth, y);
+
+  y += 5;
   y = drawDivider(doc, y);
-  y += 4;
+  y += 5;
 
   // ── 2. Goal ──
   doc.setFont('helvetica', 'bold');
@@ -216,19 +257,19 @@ export function generateReport(data: ReportData): void {
   doc.setFontSize(11);
   setTextColor(doc, colors.darkGray);
   y = renderWrappedText(doc, data.goal, MARGIN, y, CONTENT_WIDTH, 5);
-  y += 6;
+  y += 8;
 
   // ── 3. Success Score ──
   const score = computeScore(data.evaluations);
   const sColor = scoreColor(score);
 
-  y = ensureSpace(doc, y, 20);
+  y = ensureSpace(doc, y, 22);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
   setTextColor(doc, colors.gray);
   doc.text('CHANCE OF SUCCESS', MARGIN, y);
-  y += 8;
+  y += 11;
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(28);
@@ -242,11 +283,11 @@ export function generateReport(data: ReportData): void {
   setTextColor(doc, sColor);
   doc.text(scoreLabel(score), MARGIN + scoreTextWidth + 3, y);
 
-  y += 10;
+  y += 13;
 
   // ── 4. Overall Summary ──
   if (data.overallSummary) {
-    y = ensureSpace(doc, y, 20);
+    y = ensureSpace(doc, y, 22);
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
@@ -259,56 +300,56 @@ export function generateReport(data: ReportData): void {
       CONTENT_WIDTH,
       4.5
     );
-    y += 6;
+    y += 8;
 
     // Strengths
     if (data.overallSummary.strengths.length > 0) {
-      y = ensureSpace(doc, y, 12);
+      y = ensureSpace(doc, y, 14);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       setTextColor(doc, colors.green);
       doc.text('WHAT WORKS WELL', MARGIN, y);
-      y += 5;
+      y += 6;
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       setTextColor(doc, colors.darkGray);
       for (const strength of data.overallSummary.strengths) {
-        const strengthLines = doc.splitTextToSize(strength, CONTENT_WIDTH - 6);
-        y = ensureSpace(doc, y, strengthLines.length * 4 + 1);
+        const strengthLines = doc.splitTextToSize(sanitize(strength), CONTENT_WIDTH - 6);
+        y = ensureSpace(doc, y, strengthLines.length * 4 + 2);
         setFillColor(doc, colors.green);
         doc.circle(MARGIN + 2, y - 1.2, 1, 'F');
         y = renderWrappedText(doc, strength, MARGIN + 6, y, CONTENT_WIDTH - 6, 4);
-        y += 1;
+        y += 1.5;
       }
-      y += 3;
+      y += 4;
     }
 
     // Weaknesses
     if (data.overallSummary.weaknesses.length > 0) {
-      y = ensureSpace(doc, y, 12);
+      y = ensureSpace(doc, y, 14);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       setTextColor(doc, colors.red);
       doc.text('WHAT NEEDS WORK', MARGIN, y);
-      y += 5;
+      y += 6;
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       setTextColor(doc, colors.darkGray);
       for (const weakness of data.overallSummary.weaknesses) {
-        const weaknessLines = doc.splitTextToSize(weakness, CONTENT_WIDTH - 6);
-        y = ensureSpace(doc, y, weaknessLines.length * 4 + 1);
+        const weaknessLines = doc.splitTextToSize(sanitize(weakness), CONTENT_WIDTH - 6);
+        y = ensureSpace(doc, y, weaknessLines.length * 4 + 2);
         setFillColor(doc, colors.red);
         doc.circle(MARGIN + 2, y - 1.2, 1, 'F');
         y = renderWrappedText(doc, weakness, MARGIN + 6, y, CONTENT_WIDTH - 6, 4);
-        y += 1;
+        y += 1.5;
       }
-      y += 3;
+      y += 4;
     }
   }
 
-  y += 4;
+  y += 5;
 
   // ── 5. Panel Feedback ──
   y = drawSectionHeader(doc, y, 'Panel Feedback');
@@ -324,8 +365,8 @@ export function generateReport(data: ReportData): void {
     const accentCol = sentimentColor(sentiment);
     const categoryLabel = getCategoryLabel(persona.audienceCategoryId);
 
-    // Ensure space for persona header bar (name + title); core points handle their own overflow
-    y = ensureSpace(doc, y, 24);
+    // Ensure space for persona header bar
+    y = ensureSpace(doc, y, 26);
 
     // Background bar for persona header
     setFillColor(doc, bgColor);
@@ -335,17 +376,17 @@ export function generateReport(data: ReportData): void {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     setTextColor(doc, colors.darkGray);
-    doc.text(persona.name, MARGIN + 4, y + 7);
+    doc.text(sanitize(persona.name), MARGIN + 4, y + 7);
 
     // Title and category
-    const nameWidth = doc.getTextWidth(persona.name);
+    const nameWidth = doc.getTextWidth(sanitize(persona.name));
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     setTextColor(doc, colors.gray);
-    const subtitle = `${persona.title} \u2014 ${categoryLabel}`;
+    const subtitle = sanitize(`${persona.title} -- ${categoryLabel}`);
     doc.text(subtitle, MARGIN + 4 + nameWidth + 3, y + 7);
 
-    y += 16;
+    y += 18;
 
     // Sentiment label
     doc.setFont('helvetica', 'bold');
@@ -360,10 +401,9 @@ export function generateReport(data: ReportData): void {
     doc.setFontSize(9);
     setTextColor(doc, colors.darkGray);
     const decisionLines: string[] = doc.splitTextToSize(
-      evaluation.decision,
+      sanitize(evaluation.decision),
       CONTENT_WIDTH - 8 - sentLabelWidth - 3
     );
-    // Ensure space for all decision lines before printing any
     y = ensureSpace(doc, y, decisionLines.length * 4);
     if (decisionLines.length > 0) {
       doc.text(decisionLines[0], MARGIN + 4 + sentLabelWidth + 3, y);
@@ -377,14 +417,14 @@ export function generateReport(data: ReportData): void {
         y += 4;
       }
     }
-    y += 2;
+    y += 3;
 
     // Green flags
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8);
     setTextColor(doc, [22, 163, 74]);
     doc.text('GREEN FLAGS', MARGIN + 4, y);
-    y += 4;
+    y += 5;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     setTextColor(doc, colors.darkGray);
@@ -393,16 +433,16 @@ export function generateReport(data: ReportData): void {
       setFillColor(doc, [22, 163, 74]);
       doc.circle(MARGIN + 6, y - 1.2, 0.8, 'F');
       y = renderWrappedText(doc, point, MARGIN + 10, y, CONTENT_WIDTH - 10, 4);
-      y += 1;
+      y += 1.5;
     }
-    y += 3;
+    y += 4;
 
     // Red flags
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8);
     setTextColor(doc, [220, 38, 38]);
     doc.text('RED FLAGS', MARGIN + 4, y);
-    y += 4;
+    y += 5;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     setTextColor(doc, colors.darkGray);
@@ -411,17 +451,17 @@ export function generateReport(data: ReportData): void {
       setFillColor(doc, [220, 38, 38]);
       doc.circle(MARGIN + 6, y - 1.2, 0.8, 'F');
       y = renderWrappedText(doc, point, MARGIN + 10, y, CONTENT_WIDTH - 10, 4);
-      y += 1;
+      y += 1.5;
     }
-    y += 3;
+    y += 4;
 
     // Questions they'd ask
     if (evaluation.questions?.length > 0) {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
-      setTextColor(doc, [100, 116, 139]); // slate-500
-      doc.text('QUESTIONS THEY\'D ASK', MARGIN + 4, y);
-      y += 4;
+      setTextColor(doc, [100, 116, 139]);
+      doc.text("QUESTIONS THEY'D ASK", MARGIN + 4, y);
+      y += 5;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       setTextColor(doc, colors.darkGray);
@@ -429,15 +469,15 @@ export function generateReport(data: ReportData): void {
         y = ensureSpace(doc, y, 5);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
-        setTextColor(doc, [148, 163, 184]); // slate-400
+        setTextColor(doc, [148, 163, 184]);
         doc.text('?', MARGIN + 6, y);
         setTextColor(doc, colors.darkGray);
         y = renderWrappedText(doc, q, MARGIN + 10, y, CONTENT_WIDTH - 10, 4);
-        y += 1;
+        y += 1.5;
       }
     }
 
-    y += 6;
+    y += 8;
   }
 
   // ── 6. Recommendations ──
@@ -445,9 +485,15 @@ export function generateReport(data: ReportData): void {
 
   // Main advice box
   if (data.mainAdvice && data.mainAdvice.trim()) {
+    // Set font BEFORE splitTextToSize so it can calculate wrapping correctly
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+
+    // Calculate max text width accounting for both left and right padding (8mm each side = 16mm total)
+    const boxPadding = 16;
     const adviceLines: string[] = doc.splitTextToSize(
-      data.mainAdvice,
-      CONTENT_WIDTH - 16
+      sanitize(data.mainAdvice),
+      CONTENT_WIDTH - boxPadding
     );
     const adviceHeight = adviceLines.length * 4.5 + 14;
     y = ensureSpace(doc, y, adviceHeight);
@@ -469,7 +515,7 @@ export function generateReport(data: ReportData): void {
       y += 4.5;
     }
 
-    y += 6;
+    y += 8;
   }
 
   // Individual recommendations
@@ -477,7 +523,7 @@ export function generateReport(data: ReportData): void {
     const pColor = priorityColor(rec.priority);
 
     // Estimate needed space (title + text + rationale + raised by)
-    y = ensureSpace(doc, y, 25);
+    y = ensureSpace(doc, y, 28);
 
     // Number circle
     setFillColor(doc, pColor);
@@ -493,27 +539,27 @@ export function generateReport(data: ReportData): void {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     setTextColor(doc, colors.darkGray);
-    doc.text(rec.title, MARGIN + 12, y + 1);
+    doc.text(sanitize(rec.title), MARGIN + 12, y + 1);
 
     // Priority badge text
-    const titleWidth = doc.getTextWidth(rec.title);
+    const titleWidth = doc.getTextWidth(sanitize(rec.title));
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(7);
     setTextColor(doc, pColor);
     doc.text(priorityLabel(rec.priority), MARGIN + 12 + titleWidth + 3, y + 1);
 
-    y += 7;
+    y += 8;
 
     // Description text
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     setTextColor(doc, colors.darkGray);
     y = renderWrappedText(doc, rec.text, MARGIN + 12, y, CONTENT_WIDTH - 12, 4);
-    y += 2;
+    y += 3;
 
     // Why? rationale
     if (rec.priorityRationale) {
-      y = ensureSpace(doc, y, 5);
+      y = ensureSpace(doc, y, 6);
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(8);
       setTextColor(doc, colors.gray);
@@ -525,12 +571,12 @@ export function generateReport(data: ReportData): void {
         CONTENT_WIDTH - 12,
         3.5
       );
-      y += 2;
+      y += 3;
     }
 
     // Raised by persona names
     if (rec.relatedPersonaIds.length > 0) {
-      y = ensureSpace(doc, y, 5);
+      y = ensureSpace(doc, y, 6);
       const personaNames = rec.relatedPersonaIds
         .map((id) => {
           const p = data.personas.find((persona) => persona.id === id);
@@ -549,10 +595,10 @@ export function generateReport(data: ReportData): void {
         CONTENT_WIDTH - 12,
         3.5
       );
-      y += 2;
+      y += 3;
     }
 
-    y += 5;
+    y += 7;
   }
 
   // ── 7. Footers ──
