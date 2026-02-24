@@ -6,6 +6,7 @@ import type {
   Recommendation,
   StructureAdvice,
   OverallSummary,
+  AudienceSelection,
 } from '@deckster/shared/types';
 
 const SESSION_KEY = 'deckster_session';
@@ -14,7 +15,7 @@ export interface SessionState {
   screen: AppScreen;
   slideContents: SlideContent[];
   goal: string;
-  selectedAudiences: string[];
+  selectedAudiences: AudienceSelection[];
   audienceContext: string;
   personas: Persona[];
   evaluations: PersonaEvaluation[];

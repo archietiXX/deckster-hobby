@@ -104,6 +104,16 @@ function getCategoryLabel(audienceCategoryId: string): string {
   return cat ? cat.label : audienceCategoryId;
 }
 
+const knowledgeLevelLabels: Record<string, string> = {
+  expert: 'Expert in the field',
+  intermediate: 'Understands general concepts',
+  novice: 'Novice',
+};
+
+function getKnowledgeLevelLabel(level: string): string {
+  return knowledgeLevelLabels[level] ?? 'Understands general concepts';
+}
+
 function sentimentColor(sentiment: 'positive' | 'negative' | 'mixed'): RGB {
   if (sentiment === 'positive') return colors.green;
   if (sentiment === 'negative') return colors.red;
@@ -456,7 +466,8 @@ export function generateReport(data: ReportData, options: ExportOptions): void {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     setTextColor(doc, colors.gray);
-    const subtitle = sanitize(`${persona.title} -- ${categoryLabel}`);
+    const knowledgeLabel = getKnowledgeLevelLabel(persona.knowledgeLevel);
+    const subtitle = sanitize(`${persona.title} -- ${categoryLabel} -- ${knowledgeLabel}`);
     doc.text(subtitle, MARGIN + 4 + nameWidth + 3, y + 7);
 
     y += 18;

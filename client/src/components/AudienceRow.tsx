@@ -9,12 +9,9 @@ interface AudienceRowProps {
 }
 
 const knowledgeLevels = [
-  { value: 'expert', label: 'Expert' },
-  { value: 'proficient', label: 'Proficient' },
-  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'expert', label: 'Expert in the field' },
+  { value: 'intermediate', label: 'Understands general concepts' },
   { value: 'novice', label: 'Novice' },
-  { value: 'business-executive', label: 'Business/Executive' },
-  { value: 'technical-specialist', label: 'Technical Specialist' },
 ];
 
 export function AudienceRow({

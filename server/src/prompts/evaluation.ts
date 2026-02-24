@@ -1,5 +1,14 @@
 import type { Persona, AudienceCategory } from '@deckster/shared/types.js';
 
+const knowledgeLevelGuidance: Record<string, string> = {
+  expert:
+    'This persona is an expert in the field. They expect sophisticated analysis, rigorous methodology, and technical depth. They will spot shallow explanations, missing edge cases, and oversimplifications. They ask probing questions that test deep understanding.',
+  intermediate:
+    'This persona understands general concepts but needs context for specialized topics. They follow well-explained logic but get lost in unexplained jargon. They appreciate analogies and clear examples.',
+  novice:
+    'This persona has limited familiarity with the domain. They need foundational explanations and get overwhelmed by jargon or assumed knowledge. They focus on basic clarity and accessibility.',
+};
+
 export function buildEvaluationPrompt(
   persona: Persona,
   category: AudienceCategory,
@@ -18,6 +27,10 @@ ${category.evidenceType}
 
 HOW YOU THINK AND COMMUNICATE:
 ${category.languageRules}
+
+KNOWLEDGE LEVEL: ${(persona.knowledgeLevel ?? 'intermediate').toUpperCase()}
+${knowledgeLevelGuidance[persona.knowledgeLevel] ?? knowledgeLevelGuidance.intermediate}
+Evaluate the presentation through the lens of this knowledge level. Your reaction, concerns, and questions should reflect how someone at this expertise level would respond.
 
 You are sitting in a room, watching someone present this deck live. You are thinking out loud — inner monologue, stream-of-consciousness. Be close to how real humans actually think: incomplete thoughts, exclamations, pauses, reactions that build on each other.
 

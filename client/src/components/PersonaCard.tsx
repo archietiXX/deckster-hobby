@@ -2,6 +2,12 @@ import { useState } from 'react';
 import type { Persona, PersonaEvaluation } from '@deckster/shared/types';
 import { audienceCategories } from '../data/audienceCategories';
 
+const knowledgeLevelLabels: Record<string, string> = {
+  expert: 'Expert in the field',
+  intermediate: 'Understands general concepts',
+  novice: 'Novice',
+};
+
 interface PersonaCardProps {
   persona: Persona;
   evaluation?: PersonaEvaluation;
@@ -38,6 +44,9 @@ export function PersonaCard({ persona, evaluation, isExpanded, onToggle, index }
           <p className="text-[13px] text-text-secondary mt-px">{persona.title}</p>
           <span className="inline-block mt-1 px-2 py-0.5 bg-bg-accent-light text-accent-light text-[11px] font-medium rounded-full">
             {categoryLabel}
+          </span>
+          <span className="inline-block mt-1 ml-1 px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] font-medium rounded-full">
+            {knowledgeLevelLabels[persona.knowledgeLevel] ?? 'Understands general concepts'}
           </span>
         </div>
         <svg

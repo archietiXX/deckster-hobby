@@ -7,6 +7,7 @@ import type {
   Recommendation,
   StructureAdvice,
   OverallSummary,
+  AudienceSelection,
 } from '@deckster/shared/types';
 import { fetchRecommendations } from './services/api';
 import { loadSession, saveSession, clearSession } from './services/sessionStorage';
@@ -20,7 +21,7 @@ export default function App() {
   const [screen, setScreen] = useState<AppScreen>('upload');
   const [slideContents, setSlideContents] = useState<SlideContent[]>([]);
   const [goal, setGoal] = useState('');
-  const [selectedAudiences, setSelectedAudiences] = useState<string[]>([]);
+  const [selectedAudiences, setSelectedAudiences] = useState<AudienceSelection[]>([]);
   const [audienceContext, setAudienceContext] = useState('');
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [evaluations, setEvaluations] = useState<PersonaEvaluation[]>([]);
@@ -171,7 +172,7 @@ export default function App() {
         <LoadingScreen
           slideContents={slideContents}
           goal={goal}
-          audienceCategoryIds={selectedAudiences}
+          audienceSelections={selectedAudiences}
           audienceContext={audienceContext}
           onPersonasGenerated={handlePersonasGenerated}
           onEvaluationComplete={handleEvaluationComplete}

@@ -5,6 +5,7 @@ import type {
   Recommendation,
   RecommendationsResponse,
   OverallSummary,
+  AudienceSelection,
 } from '@deckster/shared/types';
 
 interface EvaluateCallbacks {
@@ -25,14 +26,14 @@ interface EvaluateCallbacks {
 export async function startEvaluation(
   slideContents: SlideContent[],
   goal: string,
-  audienceCategoryIds: string[],
+  audienceSelections: AudienceSelection[],
   audienceContext: string | undefined,
   callbacks: EvaluateCallbacks
 ): Promise<void> {
   const response = await fetch('/api/evaluate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ slideContents, goal, audienceCategoryIds, ...(audienceContext && { audienceContext }) }),
+    body: JSON.stringify({ slideContents, goal, audienceSelections, ...(audienceContext && { audienceContext }) }),
   });
 
   if (!response.ok) {

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import type { SlideContent, Persona, PersonaEvaluation, OverallSummary } from '@deckster/shared/types';
+import type { SlideContent, Persona, PersonaEvaluation, OverallSummary, AudienceSelection } from '@deckster/shared/types';
 import { startEvaluation } from '../services/api';
 import { audienceCategories } from '../data/audienceCategories';
 import { Footer } from './Footer';
@@ -7,7 +7,7 @@ import { Footer } from './Footer';
 interface LoadingScreenProps {
   slideContents: SlideContent[];
   goal: string;
-  audienceCategoryIds: string[];
+  audienceSelections: AudienceSelection[];
   audienceContext?: string;
   onPersonasGenerated: (personas: Persona[]) => void;
   onEvaluationComplete: (evaluation: PersonaEvaluation) => void;
@@ -18,7 +18,7 @@ interface LoadingScreenProps {
 export function LoadingScreen({
   slideContents,
   goal,
-  audienceCategoryIds,
+  audienceSelections,
   onPersonasGenerated,
   audienceContext,
   onEvaluationComplete,
@@ -48,7 +48,7 @@ export function LoadingScreen({
     let personaCount = 0;
     let evalCount = 0;
 
-    startEvaluation(slideContents, goal, audienceCategoryIds, audienceContext, {
+    startEvaluation(slideContents, goal, audienceSelections, audienceContext, {
       onPersonas: (newPersonas) => {
         personaCount = newPersonas.length;
         setPersonas(newPersonas);

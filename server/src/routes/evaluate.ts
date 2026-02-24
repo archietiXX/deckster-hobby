@@ -25,11 +25,11 @@ function formatSlideText(slides: SlideContent[]): string {
 
 // POST /api/evaluate — SSE stream of persona generation + evaluations
 evaluateRouter.post('/', async (req: Request, res: Response) => {
-  const { slideContents, goal, audienceCategoryIds, audienceContext } = req.body as EvaluateRequest;
+  const { slideContents, goal, audienceSelections, audienceContext } = req.body as EvaluateRequest;
 
   // Validate
-  if (!slideContents?.length || !goal?.trim() || !audienceCategoryIds?.length) {
-    res.status(400).json({ error: 'Missing required fields: slideContents, goal, audienceCategoryIds' });
+  if (!slideContents?.length || !goal?.trim() || !audienceSelections?.length) {
+    res.status(400).json({ error: 'Missing required fields: slideContents, goal, audienceSelections' });
     return;
   }
 
@@ -41,8 +41,8 @@ evaluateRouter.post('/', async (req: Request, res: Response) => {
     'X-Accel-Buffering': 'no', // Disable nginx buffering
   });
 
-  const selectedCategories: AudienceCategory[] = audienceCategoryIds
-    .map((id: string) => audienceCategories.find((c) => c.id === id))
+  const selectedCategories: AudienceCategory[] = audienceSelections
+    .map((s) => audienceCategories.find((c) => c.id === s.categoryId))
     .filter(Boolean) as AudienceCategory[];
 
   const slideText = formatSlideText(slideContents);
@@ -50,7 +50,15 @@ evaluateRouter.post('/', async (req: Request, res: Response) => {
   try {
     // Phase 1: Generate personas (pass a slide sample for cultural context detection)
     const slideTextSample = slideText.slice(0, 500);
-    const personas = await generatePersonas(goal, selectedCategories, audienceContext, slideTextSample);
+    const rawPersonas = await generatePersonas(goal, selectedCategories, audienceContext, slideTextSample);
+
+    // Attach knowledge level from user selections to each persona
+    const personas = rawPersonas.map((persona) => ({
+      ...persona,
+      knowledgeLevel:
+        audienceSelections.find((s) => s.categoryId === persona.audienceCategoryId)
+          ?.knowledgeLevel ?? 'intermediate',
+    }));
     sendSSE(res, 'personas', personas);
 
     // Phase 2: Evaluate in parallel, streaming each result as it completes
