@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Recommendation, StructureAdvice, Persona, PersonaEvaluation, OverallSummary, SlideContent } from '@deckster/shared/types';
 import { generateReport } from '../services/pdfExport';
+import { ExportModal } from './ExportModal';
+import type { ExportOptions } from './ExportModal';
 import { Footer } from './Footer';
 
 interface RecommendationsProps {
@@ -361,7 +363,10 @@ export function Recommendations({
     [filteredRecommendations, slideContents],
   );
 
-  const handleSaveReport = () => {
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  const handleExportConfirm = (exportOptions: ExportOptions) => {
+    setShowExportModal(false);
     window.posthog?.capture('Evaluator_report');
     generateReport({
       goal,
@@ -369,8 +374,9 @@ export function Recommendations({
       evaluations,
       overallSummary,
       mainAdvice,
+      structureAdvice,
       recommendations,
-    });
+    }, exportOptions);
   };
 
   let bulletIndex = 0;
@@ -410,7 +416,7 @@ export function Recommendations({
                   ? 'opacity-35 cursor-not-allowed'
                   : 'cursor-pointer shadow-[0_1px_3px_rgba(0,21,255,0.2)] bg-gradient-to-r from-accent via-accent-light to-accent bg-[length:200%_100%] animate-shimmer hover:shadow-[0_2px_8px_rgba(0,21,255,0.3)]'
               }`}
-              onClick={handleSaveReport}
+              onClick={() => setShowExportModal(true)}
               disabled={isLoading}
               type="button"
             >
@@ -623,6 +629,14 @@ export function Recommendations({
         )}
       </div>
       <Footer />
+      {showExportModal && (
+        <ExportModal
+          availablePriorities={availablePriorities}
+          hasStructureAdvice={structureAdvice.length > 0}
+          onConfirm={handleExportConfirm}
+          onClose={() => setShowExportModal(false)}
+        />
+      )}
     </div>
   );
 }

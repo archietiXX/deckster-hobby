@@ -4,8 +4,10 @@ import type {
   PersonaEvaluation,
   OverallSummary,
   Recommendation,
+  StructureAdvice,
 } from '@deckster/shared/types';
 import { audienceCategories } from '../data/audienceCategories';
+import type { ExportOptions } from '../components/ExportModal';
 
 // ── Report Data Interface ──
 
@@ -15,6 +17,7 @@ export interface ReportData {
   evaluations: PersonaEvaluation[];
   overallSummary: OverallSummary | null;
   mainAdvice: string;
+  structureAdvice: StructureAdvice[];
   recommendations: Recommendation[];
 }
 
@@ -35,6 +38,7 @@ const colors = {
   redBg: [254, 242, 242] as const,
   amberBg: [255, 251, 235] as const,
   accentBg: [245, 247, 255] as const,
+  recPageBg: [248, 248, 248] as const,
 };
 
 type RGB = readonly [number, number, number];
@@ -62,9 +66,13 @@ function setDrawColor(doc: jsPDF, color: RGB): void {
   doc.setDrawColor(color[0], color[1], color[2]);
 }
 
+/** Optional callback invoked when ensureSpace creates a new page */
+let onNewPageCallback: ((doc: jsPDF) => void) | null = null;
+
 function ensureSpace(doc: jsPDF, y: number, needed: number): number {
   if (y + needed > USABLE_BOTTOM) {
     doc.addPage();
+    if (onNewPageCallback) onNewPageCallback(doc);
     return MARGIN;
   }
   return y;
@@ -172,6 +180,81 @@ function formatDateTime(): string {
   });
 }
 
+/** Fill the current page with a solid background color */
+function fillPageBackground(doc: jsPDF, color: RGB): void {
+  setFillColor(doc, color);
+  doc.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT, 'F');
+}
+
+/** Draw a grid pattern on the current page */
+function drawGridPattern(doc: jsPDF): void {
+  const gridSize = 20; // 20mm grid
+  doc.setLineWidth(0.15);
+  setDrawColor(doc, [230, 230, 230]);
+  // Vertical lines
+  for (let x = 0; x <= PAGE_WIDTH; x += gridSize) {
+    doc.line(x, 0, x, PAGE_HEIGHT);
+  }
+  // Horizontal lines
+  for (let y = 0; y <= PAGE_HEIGHT; y += gridSize) {
+    doc.line(0, y, PAGE_WIDTH, y);
+  }
+}
+
+/** Draw the title page with grid, logo, tagline, and subtitle */
+function drawTitlePage(doc: jsPDF): void {
+  // White background with grid pattern
+  fillPageBackground(doc, [255, 255, 255]);
+  drawGridPattern(doc);
+
+  // Center of page
+  const centerX = PAGE_WIDTH / 2;
+  const centerY = PAGE_HEIGHT / 2;
+
+  // Logo: ".deckster" with blue dot
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(36);
+
+  const dotText = '.';
+  const nameText = 'deckster';
+  const dotWidth = doc.getTextWidth(dotText);
+  const nameWidth = doc.getTextWidth(nameText);
+  const logoWidth = dotWidth + nameWidth;
+  const logoX = centerX - logoWidth / 2;
+
+  // Blue dot
+  setTextColor(doc, colors.accent);
+  doc.text(dotText, logoX, centerY - 10);
+
+  // "deckster" in dark gray
+  setTextColor(doc, colors.darkGray);
+  doc.text(nameText, logoX + dotWidth, centerY - 10);
+
+  // Tagline: "FEEDBACK SIMULATOR"
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  setTextColor(doc, colors.accent);
+  const tagline = 'FEEDBACK SIMULATOR';
+  const taglineWidth = doc.getTextWidth(tagline);
+  doc.text(tagline, centerX - taglineWidth / 2, centerY + 4);
+
+  // Subtitle
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  setTextColor(doc, colors.gray);
+  const subtitle = 'Stress-test your presentation against realistic audience expectations.';
+  const subtitleWidth = doc.getTextWidth(subtitle);
+  doc.text(subtitle, centerX - subtitleWidth / 2, centerY + 14);
+
+  // Date/time at bottom
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  setTextColor(doc, colors.lightGray);
+  const dateTimeStr = formatDateTime();
+  const dateTimeWidth = doc.getTextWidth(dateTimeStr);
+  doc.text(dateTimeStr, centerX - dateTimeWidth / 2, PAGE_HEIGHT - MARGIN - 10);
+}
+
 /** Draw a thin horizontal divider line */
 function drawDivider(doc: jsPDF, y: number): number {
   setDrawColor(doc, colors.border);
@@ -182,14 +265,16 @@ function drawDivider(doc: jsPDF, y: number): number {
 
 /** Draw a section header with divider */
 function drawSectionHeader(doc: jsPDF, y: number, title: string): number {
-  y = ensureSpace(doc, y, 18);
+  y = ensureSpace(doc, y, 35);
   y = drawDivider(doc, y);
-  y += 3;
+  y += 15;
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
+  doc.setFontSize(24.5);
   setTextColor(doc, colors.darkGray);
-  doc.text(title, MARGIN, y);
-  y += 10;
+  const titleWidth = doc.getTextWidth(title);
+  const centerX = PAGE_WIDTH / 2 - titleWidth / 2;
+  doc.text(title, centerX, y);
+  y += 15;
   return y;
 }
 
@@ -213,7 +298,7 @@ function renderWrappedText(
 
 // ── Main Export Function ──
 
-export function generateReport(data: ReportData): void {
+export function generateReport(data: ReportData, options: ExportOptions): void {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -222,136 +307,124 @@ export function generateReport(data: ReportData): void {
 
   let y = MARGIN;
 
-  // ── 1. Header ──
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  setTextColor(doc, colors.darkGray);
-  doc.text('Deckster', MARGIN, y);
+  // ── 1. Title Page ──
+  drawTitlePage(doc);
 
-  const decksterWidth = doc.getTextWidth('Deckster');
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  setTextColor(doc, colors.gray);
-  doc.text('EVALUATION REPORT', MARGIN + decksterWidth + 3, y);
+  // ── 2. Goal & Overview (Section 1: Panel Reactions Summary) ──
+  if (options.mainOverview) {
+    doc.addPage();
+    y = MARGIN;
+    y = drawSectionHeader(doc, y, 'Panel Reactions Summary');
 
-  // Export date/time — right-aligned on same line as title
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  setTextColor(doc, colors.lightGray);
-  const dateTimeStr = formatDateTime();
-  const dateTimeWidth = doc.getTextWidth(dateTimeStr);
-  doc.text(dateTimeStr, MARGIN + CONTENT_WIDTH - dateTimeWidth, y);
-
-  y += 5;
-  y = drawDivider(doc, y);
-  y += 5;
-
-  // ── 2. Goal ──
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  setTextColor(doc, colors.gray);
-  doc.text('PRESENTATION GOAL', MARGIN, y);
-  y += 5;
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
-  setTextColor(doc, colors.darkGray);
-  y = renderWrappedText(doc, data.goal, MARGIN, y, CONTENT_WIDTH, 5);
-  y += 8;
-
-  // ── 3. Success Score ──
-  const score = computeScore(data.evaluations);
-  const sColor = scoreColor(score);
-
-  y = ensureSpace(doc, y, 22);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  setTextColor(doc, colors.gray);
-  doc.text('CHANCE OF SUCCESS', MARGIN, y);
-  y += 11;
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(28);
-  setTextColor(doc, sColor);
-  const scoreText = `${score}%`;
-  doc.text(scoreText, MARGIN, y);
-
-  const scoreTextWidth = doc.getTextWidth(scoreText);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(12);
-  setTextColor(doc, sColor);
-  doc.text(scoreLabel(score), MARGIN + scoreTextWidth + 3, y);
-
-  y += 13;
-
-  // ── 4. Overall Summary ──
-  if (data.overallSummary) {
-    y = ensureSpace(doc, y, 22);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    setTextColor(doc, colors.gray);
+    doc.text('PRESENTATION GOAL', MARGIN, y);
+    y += 5;
 
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
+    doc.setFontSize(11);
     setTextColor(doc, colors.darkGray);
-    y = renderWrappedText(
-      doc,
-      data.overallSummary.text,
-      MARGIN,
-      y,
-      CONTENT_WIDTH,
-      4.5
-    );
-    y += 8;
+    y = renderWrappedText(doc, data.goal, MARGIN, y, CONTENT_WIDTH, 5);
+    y += 7;
 
-    // Strengths
-    if (data.overallSummary.strengths.length > 0) {
-      y = ensureSpace(doc, y, 14);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      setTextColor(doc, colors.green);
-      doc.text('WHAT WORKS WELL', MARGIN, y);
-      y += 6;
+    // ── 3. Success Score ──
+    const score = computeScore(data.evaluations);
+    const sColor = scoreColor(score);
 
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      setTextColor(doc, colors.darkGray);
-      for (const strength of data.overallSummary.strengths) {
-        const strengthLines = doc.splitTextToSize(sanitize(strength), CONTENT_WIDTH - 6);
-        y = ensureSpace(doc, y, strengthLines.length * 4 + 2);
-        setFillColor(doc, colors.green);
-        doc.circle(MARGIN + 2, y - 1.2, 1, 'F');
-        y = renderWrappedText(doc, strength, MARGIN + 6, y, CONTENT_WIDTH - 6, 4);
-        y += 1.5;
-      }
-      y += 4;
-    }
+    y = ensureSpace(doc, y, 22);
 
-    // Weaknesses
-    if (data.overallSummary.weaknesses.length > 0) {
-      y = ensureSpace(doc, y, 14);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      setTextColor(doc, colors.red);
-      doc.text('WHAT NEEDS WORK', MARGIN, y);
-      y += 6;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    setTextColor(doc, colors.gray);
+    doc.text('CHANCE OF SUCCESS', MARGIN, y);
+    y += 11;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(28);
+    setTextColor(doc, sColor);
+    const scoreText = `${score}%`;
+    doc.text(scoreText, MARGIN, y);
+
+    const scoreTextWidth = doc.getTextWidth(scoreText);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(12);
+    setTextColor(doc, sColor);
+    doc.text(scoreLabel(score), MARGIN + scoreTextWidth + 3, y);
+
+    y += 7;
+
+    // ── 4. Overall Summary ──
+    if (data.overallSummary) {
+      y = ensureSpace(doc, y, 22);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
+      doc.setFontSize(10);
       setTextColor(doc, colors.darkGray);
-      for (const weakness of data.overallSummary.weaknesses) {
-        const weaknessLines = doc.splitTextToSize(sanitize(weakness), CONTENT_WIDTH - 6);
-        y = ensureSpace(doc, y, weaknessLines.length * 4 + 2);
-        setFillColor(doc, colors.red);
-        doc.circle(MARGIN + 2, y - 1.2, 1, 'F');
-        y = renderWrappedText(doc, weakness, MARGIN + 6, y, CONTENT_WIDTH - 6, 4);
-        y += 1.5;
+      y = renderWrappedText(
+        doc,
+        data.overallSummary.text,
+        MARGIN,
+        y,
+        CONTENT_WIDTH,
+        4.5
+      );
+      y += 7;
+
+      // Strengths
+      if (data.overallSummary.strengths.length > 0) {
+        y = ensureSpace(doc, y, 14);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        setTextColor(doc, colors.green);
+        doc.text('WHAT WORKS WELL', MARGIN, y);
+        y += 6;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        setTextColor(doc, colors.darkGray);
+        for (const strength of data.overallSummary.strengths) {
+          const strengthLines = doc.splitTextToSize(sanitize(strength), CONTENT_WIDTH - 6);
+          y = ensureSpace(doc, y, strengthLines.length * 4 + 2);
+          setFillColor(doc, colors.green);
+          doc.circle(MARGIN + 2, y - 1.2, 1, 'F');
+          y = renderWrappedText(doc, strength, MARGIN + 6, y, CONTENT_WIDTH - 6, 4);
+          y += 1.5;
+        }
+        y += 7;
       }
-      y += 4;
+
+      // Weaknesses
+      if (data.overallSummary.weaknesses.length > 0) {
+        y = ensureSpace(doc, y, 14);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        setTextColor(doc, colors.red);
+        doc.text('WHAT NEEDS WORK', MARGIN, y);
+        y += 6;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        setTextColor(doc, colors.darkGray);
+        for (const weakness of data.overallSummary.weaknesses) {
+          const weaknessLines = doc.splitTextToSize(sanitize(weakness), CONTENT_WIDTH - 6);
+          y = ensureSpace(doc, y, weaknessLines.length * 4 + 2);
+          setFillColor(doc, colors.red);
+          doc.circle(MARGIN + 2, y - 1.2, 1, 'F');
+          y = renderWrappedText(doc, weakness, MARGIN + 6, y, CONTENT_WIDTH - 6, 4);
+          y += 1.5;
+        }
+        y += 7;
+      }
     }
+
+    y += 7;
   }
 
-  y += 5;
-
-  // ── 5. Panel Feedback ──
+  // ── 5. Panel Feedback (Section 2) ──
+  if (options.individualFeedback) {
+  doc.addPage();
+  y = MARGIN;
   y = drawSectionHeader(doc, y, 'Panel Feedback');
 
   for (const persona of data.personas) {
@@ -477,10 +550,20 @@ export function generateReport(data: ReportData): void {
       }
     }
 
-    y += 8;
+    y += 7;
   }
+  } // end individualFeedback
 
-  // ── 6. Recommendations ──
+  // ── 6. Recommendations (Section 3) ──
+  const anyRecsSelected = options.deckStructure || Object.values(options.priorities).some(Boolean);
+  if (anyRecsSelected) {
+  // Set up rec page background callback for any overflow pages
+  const drawRecBg = (d: jsPDF) => fillPageBackground(d, colors.recPageBg);
+  onNewPageCallback = drawRecBg;
+
+  doc.addPage();
+  drawRecBg(doc); // background on first rec page
+  y = MARGIN;
   y = drawSectionHeader(doc, y, 'Recommendations');
 
   // Main advice box
@@ -515,11 +598,63 @@ export function generateReport(data: ReportData): void {
       y += 4.5;
     }
 
-    y += 8;
+    y += 7;
+  }
+
+  // Deck Structure section
+  if (options.deckStructure && data.structureAdvice.length > 0) {
+    y = ensureSpace(doc, y, 14);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    setTextColor(doc, colors.darkGray);
+    doc.text('Deck Structure', MARGIN, y);
+    y += 7;
+
+    const structureActionConfig: Record<string, { label: string; color: RGB }> = {
+      add: { label: 'ADD', color: colors.green },
+      delete: { label: 'REMOVE', color: colors.red },
+      reorder: { label: 'REORDER', color: [139, 92, 246] },
+    };
+
+    for (const sa of data.structureAdvice) {
+      const ac = structureActionConfig[sa.action] ?? structureActionConfig.add;
+      y = ensureSpace(doc, y, 14);
+
+      // Bullet point (colored by action type)
+      setFillColor(doc, ac.color);
+      doc.circle(MARGIN + 2, y - 1.2, 1, 'F');
+
+      // Action badge
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      setTextColor(doc, ac.color);
+      doc.text(ac.label, MARGIN + 6, y);
+      y += 4;
+
+      // Description (full width, within margins)
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      setTextColor(doc, colors.darkGray);
+      y = renderWrappedText(doc, sa.description, MARGIN + 6, y, CONTENT_WIDTH - 6, 4);
+
+      // Rationale
+      if (sa.rationale) {
+        y += 1;
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(8);
+        setTextColor(doc, colors.gray);
+        y = renderWrappedText(doc, sa.rationale, MARGIN + 6, y, CONTENT_WIDTH - 6, 3.5);
+      }
+
+      y += 3;
+    }
+
+    y += 7;
   }
 
   // Individual recommendations
-  for (const rec of data.recommendations) {
+  const filteredRecs = data.recommendations.filter((rec) => options.priorities[rec.priority]);
+  for (const rec of filteredRecs) {
     const pColor = priorityColor(rec.priority);
 
     // Estimate needed space (title + text + rationale + raised by)
@@ -600,6 +735,9 @@ export function generateReport(data: ReportData): void {
 
     y += 7;
   }
+  // Clear the rec page background callback
+  onNewPageCallback = null;
+  } // end anyRecsSelected
 
   // ── 7. Footers ──
   const totalPages = doc.getNumberOfPages();
@@ -607,6 +745,10 @@ export function generateReport(data: ReportData): void {
 
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
+
+    // Skip footer on title page (page 1)
+    if (i === 1) continue;
+
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     setTextColor(doc, colors.lightGray);
@@ -641,8 +783,10 @@ export function generateReport(data: ReportData): void {
       { url: 'https://deckster.pro/' }
     );
 
-    // Right footer - page numbers
-    const pageText = `${i} / ${totalPages}`;
+    // Right footer - page numbers (exclude title page from numbering)
+    const contentPageNum = i - 1;
+    const contentPageTotal = totalPages - 1;
+    const pageText = `${contentPageNum} / ${contentPageTotal}`;
     const pageTextWidth = doc.getTextWidth(pageText);
     setTextColor(doc, colors.lightGray);
     doc.text(
