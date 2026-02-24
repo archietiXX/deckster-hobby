@@ -1,14 +1,15 @@
 import { useCallback } from 'react';
 import { audienceCategories } from '../data/audienceCategories';
-import { AudienceChip } from './AudienceChip';
+import type { AudienceSelection } from '@deckster/shared/types';
+import { AudienceRow } from './AudienceRow';
 import { Footer } from './Footer';
 
 interface SetupModalProps {
   fileName: string;
   goal: string;
   onGoalChange: (goal: string) => void;
-  selectedAudiences: string[];
-  onAudiencesChange: (audiences: string[]) => void;
+  selectedAudiences: AudienceSelection[];
+  onAudiencesChange: (audiences: AudienceSelection[]) => void;
   audienceContext: string;
   onAudienceContextChange: (context: string) => void;
   onEvaluate: () => void;
@@ -28,10 +29,22 @@ export function SetupModal({
 }: SetupModalProps) {
   const toggleAudience = useCallback(
     (id: string) => {
+      const isSelected = selectedAudiences.some((s) => s.categoryId === id);
       onAudiencesChange(
-        selectedAudiences.includes(id)
-          ? selectedAudiences.filter((a) => a !== id)
-          : [...selectedAudiences, id]
+        isSelected
+          ? selectedAudiences.filter((a) => a.categoryId !== id)
+          : [...selectedAudiences, { categoryId: id, knowledgeLevel: 'intermediate' }]
+      );
+    },
+    [selectedAudiences, onAudiencesChange]
+  );
+
+  const updateKnowledgeLevel = useCallback(
+    (categoryId: string, knowledgeLevel: string) => {
+      onAudiencesChange(
+        selectedAudiences.map((s) =>
+          s.categoryId === categoryId ? { ...s, knowledgeLevel } : s
+        )
       );
     },
     [selectedAudiences, onAudiencesChange]
@@ -113,15 +126,20 @@ export function SetupModal({
             Who is in the audience?
             <span className="text-[13px] font-normal text-gray-400 ml-auto">Select all that apply</span>
           </label>
-          <div className="flex flex-wrap gap-2">
-            {audienceCategories.map((cat) => (
-              <AudienceChip
-                key={cat.id}
-                category={cat}
-                isSelected={selectedAudiences.includes(cat.id)}
-                onToggle={() => toggleAudience(cat.id)}
-              />
-            ))}
+          <div className="flex flex-col gap-2">
+            {audienceCategories.map((cat) => {
+              const selection = selectedAudiences.find((s) => s.categoryId === cat.id);
+              return (
+                <AudienceRow
+                  key={cat.id}
+                  category={cat}
+                  isSelected={!!selection}
+                  knowledgeLevel={selection?.knowledgeLevel ?? 'intermediate'}
+                  onToggle={() => toggleAudience(cat.id)}
+                  onKnowledgeLevelChange={(level) => updateKnowledgeLevel(cat.id, level)}
+                />
+              );
+            })}
           </div>
           {selectedAudiences.length > 0 && (
             <p className="text-[13px] text-accent font-medium">
